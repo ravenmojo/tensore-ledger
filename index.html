@@ -5,83 +5,163 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lab Cleaning Ledger</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <style>
+  <style id="theme-styles">
+    /* Default light theme */
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f9f9f9;
+      --text-primary: #333333;
+      --text-secondary: #7f8c8d;
+      --header-border: #4a6fa5;
+      --table-header-bg: #4a6fa5;
+      --table-header-text: #ffffff;
+      --table-row-hover: #f5f9ff;
+      --balance-bg: #e8f4f8;
+      --credit: #27ae60;
+      --debit: #c0392b;
+      --footer-text: #95a5a6;
+      --shadow: rgba(0,0,0,0.1);
+    }
+
+    /* Dark theme override */
+    .dark-mode {
+      --bg-primary: #1e1e1e;
+      --bg-secondary: #121212;
+      --text-primary: #e0e0e0;
+      --text-secondary: #b0b0b0;
+      --header-border: #5d8aa8;
+      --table-header-bg: #2c3e50;
+      --table-header-text: #ecf0f1;
+      --table-row-hover: #2a2a2a;
+      --balance-bg: #1a2b3c;
+      --credit: #2ecc71;
+      --debit: #e74c3c;
+      --footer-text: #95a5a6;
+      --shadow: rgba(0,0,0,0.3);
+    }
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
       padding: 20px;
       max-width: 1200px;
       margin: 0 auto;
     }
+
     header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
       padding-bottom: 15px;
-      border-bottom: 2px solid #4a6fa5;
+      border-bottom: 2px solid var(--header-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
+
     h1 {
-      color: #2c3e50;
+      color: var(--text-primary);
       margin: 0;
     }
+
+    .theme-toggle {
+      background: var(--table-header-bg);
+      color: var(--table-header-text);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
     .last-updated {
       font-size: 0.9em;
-      color: #7f8c8d;
-      margin-top: 8px;
+      color: var(--text-secondary);
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      background: white;
+      box-shadow: 0 2px 8px var(--shadow);
+      background: var(--bg-primary);
+      border-radius: 8px;
+      overflow: hidden;
     }
+
     th, td {
       padding: 12px 15px;
       text-align: left;
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid rgba(200,200,200,0.2);
     }
+
     th {
-      background-color: #4a6fa5;
-      color: white;
+      background-color: var(--table-header-bg);
+      color: var(--table-header-text);
       font-weight: 600;
       text-transform: uppercase;
       font-size: 0.9em;
     }
+
     tr:last-child td {
       border-bottom: none;
     }
+
     tr:hover {
-      background-color: #f5f9ff;
+      background-color: var(--table-row-hover);
     }
+
     .balance-row {
       font-weight: bold;
-      background-color: #e8f4f8 !important;
+      background-color: var(--balance-bg) !important;
     }
-    .currency {
-      font-family: monospace;
+
+    .credit {
+      color: var(--credit);
+      font-weight: 600;
     }
+
+    .debit {
+      color: var(--debit);
+      font-weight: 600;
+    }
+
     footer {
       text-align: center;
       margin-top: 30px;
-      color: #95a5a6;
+      color: var(--footer-text);
       font-size: 0.9em;
+      line-height: 1.5;
+    }
+
+    footer a {
+      color: var(--text-primary);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      th, td {
+        padding: 8px 6px;
+        font-size: 0.9em;
+      }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Cleaning Fund Ledger</h1>
+    <h1>🔬 Laboratory Cleaning Fund Ledger</h1>
+    <button class="theme-toggle" id="themeToggle">🌓 Toggle Theme</button>
     <div class="last-updated">Live data from Google Sheets</div>
   </header>
 
   <table id="ledger-table">
     <thead>
       <tr>
-        <th>Lab Member Name</th>
+        <th>Name</th>
         <th>Date</th>
-        <th>Debit (₹)</th>
-        <th>Credit (₹)</th>
-        <th>Balance (₹)</th>
+        <th>Debit</th>
+        <th>Credit</th>
+        <th>Balance</th>
       </tr>
     </thead>
     <tbody id="ledger-body">
@@ -89,83 +169,108 @@
     </tbody>
   </table>
 
-<footer>
-  <strong>
+  <footer>
     Updated automatically • Refresh page to see latest entries<br>
     Source at <a href="https://github.com/ravenmojo/tensore-ledger" target="_blank">GitHub</a><br>
     Made with ♥ by <a href="https://ravenmojo.github.io/" target="_blank">Souradeep Satpathy</a><br>
     <a href="https://sites.google.com/view/tensore/home" target="_blank">TENSORE LAB</a>
-  </strong>
-</footer>
-  
+  </footer>
+
   <script>
-    // 🔗 Replace with your published CSV URL
+    // === Theme Management ===
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+
+    // Detect system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Check for saved user preference
+    const savedTheme = localStorage.getItem('ledger-theme');
+
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      body.classList.add('dark-mode');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
+      const isDark = body.classList.contains('dark-mode');
+      localStorage.setItem('ledger-theme', isDark ? 'dark' : 'light');
+    });
+
+    // === Data Formatting ===
+    function formatNumber(value) {
+      if (value === "" || value == null) return "—";
+      const num = parseFloat(value);
+      if (isNaN(num)) return "—";
+      return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "—";
+      const parts = dateStr.split('/');
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        if (!isNaN(day) && !isNaN(month) && !isNaN(year) && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
+          const date = new Date(year, month, day);
+          if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
+            return `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
+          }
+        }
+      }
+      return dateStr;
+    }
+
+    // === Fetch and Render Data ===
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSIvmo5aD2rAjv245M91KCPIlVw9u5qH3K112QnJE7iVokxUEK6NiSj1TpzHWfWd_NybBljUHqf2MBA/pub?gid=0&single=true&output=csv";
 
-  function formatNumber(value) {
-    if (value === "" || value == null) return "—";
-    const num = parseFloat(value);
-    if (isNaN(num)) return "—";
-    return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
+    Papa.parse(CSV_URL, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const tbody = document.getElementById("ledger-body");
+        tbody.innerHTML = "";
 
-  function formatDate(dateStr) {
-    if (!dateStr) return "—";
-    const date = new Date(dateStr);
-    if (isNaN(date)) return dateStr;
-
-    const month = String(date.getDate()).padStart(2, '0');
-    const day = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
-
-  Papa.parse(CSV_URL, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-      const tbody = document.getElementById("ledger-body");
-      tbody.innerHTML = ""; // Clear loading message
-
-      if (results.data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">No data available</td></tr>`;
-        return;
-      }
-
-      results.data.forEach(row => {
-        const tr = document.createElement("tr");
-
-        // Detect summary/balance row: empty Name + has Balance
-        const isSummaryRow = (!row["Name"] || row["Name"].toString().trim() === "") && row["Balance"];
-
-        if (isSummaryRow) {
-          tr.classList.add("balance-row");
-          tr.innerHTML = `
-            <td colspan="4" style="text-align: right;"><strong>Current Balance:</strong></td>
-            <td class="currency">${formatNumber(row["Balance"])}</td>
-          `;
-        } else {
-          tr.innerHTML = `
-            <td>${row["Name"] || "—"}</td>
-            <td>${formatDate(row["Date"])}</td>
-            <td class="currency">${formatNumber(row["Debit"])}</td>
-            <td class="currency">${formatNumber(row["Credit"])}</td>
-            <td class="currency">${formatNumber(row["Balance"])}</td>
-          `;
+        if (results.data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">No data available</td></tr>`;
+          return;
         }
-        tbody.appendChild(tr);
-      });
 
-      document.querySelector(".last-updated").textContent = 
-        "Last updated: " + new Date().toLocaleString('en-IN');
-    },
-    error: function(error) {
-      document.getElementById("ledger-body").innerHTML = 
-        `<tr><td colspan="5" style="text-align: center; color: red;">Failed to load ledger</td></tr>`;
-      console.error("CSV Load Error:", error);
-    }
-  });
-</script>
+        results.data.forEach(row => {
+          const tr = document.createElement("tr");
+          const isSummaryRow = (!row["Name"] || row["Name"].toString().trim() === "") && row["Balance"];
+
+          if (isSummaryRow) {
+            tr.classList.add("balance-row");
+            tr.innerHTML = `
+              <td colspan="4" style="text-align: right;"><strong>Current Balance:</strong></td>
+              <td>${formatNumber(row["Balance"])}</td>
+            `;
+          } else {
+            const debit = row["Debit"];
+            const credit = row["Credit"];
+            tr.innerHTML = `
+              <td>${row["Name"] || "—"}</td>
+              <td>${formatDate(row["Date"])}</td>
+              <td class="${debit ? 'debit' : ''}">${formatNumber(debit)}</td>
+              <td class="${credit ? 'credit' : ''}">${formatNumber(credit)}</td>
+              <td>${formatNumber(row["Balance"])}</td>
+            `;
+          }
+          tbody.appendChild(tr);
+        });
+
+        document.querySelector(".last-updated").textContent = 
+          "Last updated: " + new Date().toLocaleString('en-IN');
+      },
+      error: function(error) {
+        document.getElementById("ledger-body").innerHTML = 
+          `<tr><td colspan="5" style="text-align: center; color: var(--debit);">Failed to load ledger</td></tr>`;
+        console.error("CSV Load Error:", error);
+      }
+    });
+  </script>
 </body>
 </html>
