@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lab Cleaning Ledger</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #4a6fa5;
+    }
+    h1 {
+      color: #2c3e50;
+      margin: 0;
+    }
+    .last-updated {
+      font-size: 0.9em;
+      color: #7f8c8d;
+      margin-top: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: white;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    th {
+      background-color: #4a6fa5;
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.9em;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover {
+      background-color: #f5f9ff;
+    }
+    .balance-row {
+      font-weight: bold;
+      background-color: #e8f4f8 !important;
+    }
+    .currency {
+      font-family: monospace;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #95a5a6;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔬 Laboratory Cleaning Fund Ledger</h1>
+    <div class="last-updated">Live data from Google Sheets</div>
+  </header>
+
+  <table id="ledger-table">
+    <thead>
+      <tr>
+        <th>Lab Member Name</th>
+        <th>Date</th>
+        <th>Debit (₹)</th>
+        <th>Credit (₹)</th>
+        <th>Balance (₹)</th>
+      </tr>
+    </thead>
+    <tbody id="ledger-body">
+      <tr><td colspan="5" style="text-align: center;">Loading ledger...</td></tr>
+    </tbody>
+  </table>
+
+  <footer>
+    Updated automatically • Refresh page to see latest entries
+    Source at <a href="http://github.com/ravenmojo/tensore-ledger" target="_blank">Github</a><br>
+      Made with ♥ by <a href="https://ravenmojo.github.io/" target="_blank">Souradeep Satpathy</a><br><a href="https://sites.google.com/view/tensore/home" target="_blank">TENSORE LAB</a>      
+  </footer>
+
+  <script>
+    // 🔗 Replace with your published CSV URL
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSIvmo5aD2rAjv245M91KCPIlVw9u5qH3K112QnJE7iVokxUEK6NiSj1TpzHWfWd_NybBljUHqf2MBA/pub?gid=0&single=true&output=csv";
+
+    function formatCurrency(value) {
+      if (value === "" || value == null) return "—";
+      const num = parseFloat(value);
+      return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "—";
+      const date = new Date(dateStr);
+      if (isNaN(date)) return dateStr;
+      return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
+    }
+
+    Papa.parse(CSV_URL, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const tbody = document.getElementById("ledger-body");
+        tbody.innerHTML = ""; // Clear loading message
+
+        if (results.data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">No data available</td></tr>`;
+          return;
+        }
+
+        results.data.forEach(row => {
+          const tr = document.createElement("tr");
+          
+          // Detect balance row (if Balance column is filled but Name is empty)
+          const isBalanceRow = !row["Lab Member Name"] && row["Balance"];
+          if (isBalanceRow) {
+            tr.classList.add("balance-row");
+            tr.innerHTML = `
+              <td colspan="4" style="text-align: right;"><strong>Current Balance:</strong></td>
+              <td class="currency">₹${formatCurrency(row["Balance"])}</td>
+            `;
+          } else {
+            tr.innerHTML = `
+              <td>${row["Lab Member Name"] || "—"}</td>
+              <td>${formatDate(row["Date"])}</td>
+              <td class="currency">₹${formatCurrency(row["Debit amount"])}</td>
+              <td class="currency">₹${formatCurrency(row["Credit amount"])}</td>
+              <td class=currency>₹${formatCurrency(row["Balance"])}</td>
+            `;
+          }
+          tbody.appendChild(tr);
+        });
+
+        // Update "last updated" time
+        document.querySelector(".last-updated").textContent = 
+          "Last updated: " + new Date().toLocaleString();
+      },
+      error: function(error) {
+        document.getElementById("ledger-body").innerHTML = 
+          `<tr><td colspan="5" style="text-align: center; color: red;">Failed to load ledger</td></tr>`;
+        console.error("CSV Load Error:", error);
+      }
+    });
+  </script>
+</body>
+</html>
