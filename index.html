@@ -102,9 +102,10 @@
     // 🔗 Replace with your published CSV URL
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSIvmo5aD2rAjv245M91KCPIlVw9u5qH3K112QnJE7iVokxUEK6NiSj1TpzHWfWd_NybBljUHqf2MBA/pub?gid=0&single=true&output=csv";
 
-  function formatCurrency(value) {
+  function formatNumber(value) {
     if (value === "" || value == null) return "—";
     const num = parseFloat(value);
+    if (isNaN(num)) return "—";
     return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
@@ -112,7 +113,11 @@
     if (!dateStr) return "—";
     const date = new Date(dateStr);
     if (isNaN(date)) return dateStr;
-    return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 
   Papa.parse(CSV_URL, {
@@ -131,29 +136,29 @@
       results.data.forEach(row => {
         const tr = document.createElement("tr");
 
-        // Detect summary/balance rows: empty Name + has Balance
+        // Detect summary/balance row: empty Name + has Balance
         const isSummaryRow = (!row["Name"] || row["Name"].toString().trim() === "") && row["Balance"];
 
         if (isSummaryRow) {
           tr.classList.add("balance-row");
           tr.innerHTML = `
             <td colspan="4" style="text-align: right;"><strong>Current Balance:</strong></td>
-            <td class="currency">₹${formatCurrency(row["Balance"])}</td>
+            <td class="currency">${formatNumber(row["Balance"])}</td>
           `;
         } else {
           tr.innerHTML = `
             <td>${row["Name"] || "—"}</td>
             <td>${formatDate(row["Date"])}</td>
-            <td class="currency">₹${formatCurrency(row["Debit"])}</td>
-            <td class="currency">₹${formatCurrency(row["Credit"])}</td>
-            <td class="currency">₹${formatCurrency(row["Balance"])}</td>
+            <td class="currency">${formatNumber(row["Debit"])}</td>
+            <td class="currency">${formatNumber(row["Credit"])}</td>
+            <td class="currency">${formatNumber(row["Balance"])}</td>
           `;
         }
         tbody.appendChild(tr);
       });
 
       document.querySelector(".last-updated").textContent = 
-        "Last updated: " + new Date().toLocaleString();
+        "Last updated: " + new Date().toLocaleString('en-IN');
     },
     error: function(error) {
       document.getElementById("ledger-body").innerHTML = 
