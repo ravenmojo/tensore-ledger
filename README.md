@@ -1,4 +1,5 @@
 # tensore-ledger
+https://ravenmojo.github.io/tensore-ledger/
 Automated, transparent financial ledger for the TENSORE Lab, Indian Institue of Technology Kharagpur. Tracks member contributions (credits) and service payments (debits) via Google Forms + Sheets, with admin approval and live public display. Free, serverless, and audit-ready.
 
 Built with Google Forms, Google Sheets, and a lightweight static website, this system enables:
