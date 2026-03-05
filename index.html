@@ -330,10 +330,8 @@
           return;
         }
 
-        // Reverse data to show newest entries at the bottom
-        const reversedData = [...results.data].reverse();
-
-        reversedData.forEach(row => {
+        // Render data in ORIGINAL chronological order (oldest first, newest last)
+        results.data.forEach(row => {
           const tr = document.createElement("tr");
           const isSummaryRow = (!row["Name"] || row["Name"].toString().trim() === "") && row["Balance"];
 
@@ -357,7 +355,7 @@
           tbody.appendChild(tr);
         });
 
-        // Auto-scroll to bottom after rendering (newest entries)
+        // Auto-scroll to BOTTOM after rendering (shows newest entries)
         setTimeout(() => {
           container.scrollTop = container.scrollHeight;
         }, 100);
