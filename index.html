@@ -6,7 +6,6 @@
   <title>Lab Cleaning Ledger</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style id="theme-styles">
-    
     /* Default light theme */
     :root {
       --bg-primary: #ffffff;
@@ -27,7 +26,7 @@
     /* Dark theme override */
     .dark-mode {
       --bg-primary: #1e1e1e;
-      --bg-secondary: #000000;
+      --bg-secondary: #121212;
       --text-primary: #e0e0e0;
       --text-secondary: #b0b0b0;
       --header-border: #5d8aa8;
@@ -81,29 +80,55 @@
       color: var(--text-secondary);
     }
 
+    /* Scrollable ledger container */
+    #ledger-container {
+      max-height: 65vh; /* Shows ~10-12 rows comfortably */
+      overflow-y: auto;
+      border: 1px solid var(--shadow);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      position: relative;
+      box-shadow: 0 2px 8px var(--shadow);
+      background: var(--bg-primary);
+    }
+
+    /* Scrollbar styling */
+    #ledger-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    #ledger-container::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+      border-radius: 4px;
+    }
+    #ledger-container::-webkit-scrollbar-thumb {
+      background: var(--table-header-bg);
+      border-radius: 4px;
+    }
+    #ledger-container::-webkit-scrollbar-thumb:hover {
+      background: var(--header-border);
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      box-shadow: 0 2px 8px var(--shadow);
-      background: var(--bg-primary);
-      border-radius: 8px;
-      overflow: hidden;
     }
 
     th, td {
-      padding: 8px 10px; /* Reduced from 12px 15px */
+      padding: 8px 10px;
       text-align: left;
-      font-size: 1.0em; /* Slightly smaller text */
+      font-size: 0.95em;
       border-bottom: 1px solid rgba(200,200,200,0.2);
     }
     
-    /* Optional: Reduce header font size slightly */
     th {
       background-color: var(--table-header-bg);
       color: var(--table-header-text);
       font-size: 0.88em;
       text-transform: uppercase;
       font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     tr:last-child td {
@@ -129,6 +154,40 @@
       font-weight: 600;
     }
 
+    /* Scroll to bottom button */
+    .scroll-to-bottom {
+      position: sticky;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--table-header-bg);
+      color: var(--table-header-text);
+      border: none;
+      border-radius: 25px;
+      padding: 8px 16px;
+      font-size: 0.85em;
+      cursor: pointer;
+      box-shadow: 0 2px 6px var(--shadow);
+      display: none;
+      z-index: 20;
+      transition: all 0.3s ease;
+    }
+
+    .scroll-to-bottom.show {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .scroll-to-bottom:hover {
+      background: var(--header-border);
+      transform: translateX(-50%) scale(1.05);
+    }
+
     footer {
       text-align: center;
       margin-top: 30px;
@@ -144,8 +203,15 @@
 
     @media (max-width: 600px) {
       th, td {
-        padding: 8px 6px;
+        padding: 7px 6px;
         font-size: 0.9em;
+      }
+      #ledger-container {
+        max-height: 60vh;
+      }
+      .scroll-to-bottom {
+        padding: 7px 14px;
+        font-size: 0.8em;
       }
     }
   </style>
@@ -157,20 +223,24 @@
     <div class="last-updated">Live data from Google Sheets</div>
   </header>
 
-  <table id="ledger-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Date</th>
-        <th>Debit</th>
-        <th>Credit</th>
-        <th>Balance</th>
-      </tr>
-    </thead>
-    <tbody id="ledger-body">
-      <tr><td colspan="5" style="text-align: center;">Loading ledger...</td></tr>
-    </tbody>
-  </table>
+  <div id="ledger-container">
+    <table id="ledger-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Date</th>
+          <th>Debit</th>
+          <th>Credit</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody id="ledger-body">
+        <tr><td colspan="5" style="text-align: center;">Loading ledger...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button class="scroll-to-bottom" id="scrollToBottom">↓ Latest</button>
 
   <footer>
     Refresh page to see latest approved entries<br>
@@ -186,8 +256,6 @@
 
     // Detect system preference
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    // Check for saved user preference
     const savedTheme = localStorage.getItem('ledger-theme');
 
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
@@ -225,6 +293,27 @@
       return dateStr;
     }
 
+    // === Scroll Management ===
+    const container = document.getElementById("ledger-container");
+    const scrollToBottomBtn = document.getElementById("scrollToBottom");
+
+    // Show button when scrolled up more than 50px
+    container.addEventListener("scroll", () => {
+      if (container.scrollTop > 50) {
+        scrollToBottomBtn.classList.add("show");
+      } else {
+        scrollToBottomBtn.classList.remove("show");
+      }
+    });
+
+    // Scroll to bottom button functionality
+    scrollToBottomBtn.addEventListener("click", () => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth"
+      });
+    });
+
     // === Fetch and Render Data ===
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSIvmo5aD2rAjv245M91KCPIlVw9u5qH3K112QnJE7iVokxUEK6NiSj1TpzHWfWd_NybBljUHqf2MBA/pub?gid=0&single=true&output=csv";
 
@@ -241,7 +330,10 @@
           return;
         }
 
-        results.data.forEach(row => {
+        // Reverse data to show newest entries at the bottom
+        const reversedData = [...results.data].reverse();
+
+        reversedData.forEach(row => {
           const tr = document.createElement("tr");
           const isSummaryRow = (!row["Name"] || row["Name"].toString().trim() === "") && row["Balance"];
 
@@ -265,6 +357,12 @@
           tbody.appendChild(tr);
         });
 
+        // Auto-scroll to bottom after rendering (newest entries)
+        setTimeout(() => {
+          container.scrollTop = container.scrollHeight;
+        }, 100);
+
+        // Update timestamp
         document.querySelector(".last-updated").textContent = 
           "Last updated: " + new Date().toLocaleString('en-IN');
       },
