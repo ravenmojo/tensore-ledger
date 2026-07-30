@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TENSORE Lab Cleaning Fund</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style id="theme-styles">
+    /* Earth-Toned Theme */
+    :root {
+      --bg-primary: #fffcf2;          /* floral-white */
+      --bg-secondary: #fffaf5;        /* warm off-white */
+      --text-primary: #403d39;        /* charcoal-brown */
+      --text-secondary: #7a7570;      /* muted brown */
+      --header-border: #eb5e28;       /* spicy-paprika */
+      --table-header-bg: #252422;     /* carbon-black */
+      --table-header-text: #fffcf2;   /* floral-white */
+      --table-row-hover: #f8f5ee;     /* soft cream */
+      --balance-bg: #f0e9e1;          /* warm beige */
+      --credit: #2d7a4f;              /* forest green (financial standard) */
+      --debit: #c53030;               /* soft red (financial standard) */
+      --footer-text: #8a8580;
+      --shadow: rgba(37, 36, 34, 0.08);
+      --accent-paprika: #eb5e28;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--header-border);
+      position: relative;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 2px;
+      background: var(--accent-paprika);
+      border-radius: 1px;
+    }
+
+    h1 {
+      color: var(--text-primary);
+      margin: 0;
+      font-size: 2.0em;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, #403d39, #eb5e28);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .last-updated {
+      font-size: 0.88em;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    /* Balance Display */
+    #balance-display {
+      text-align: center;
+      padding: 30px 20px;
+      background: var(--balance-bg);
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 3px 12px var(--shadow);
+      font-size: 1.4em;
+      font-weight: 600;
+      color: var(--text-primary);
+      border: 1px solid rgba(64, 61, 57, 0.1);
+    }
+
+    #balance-value {
+      font-size: 2.4em;
+      font-weight: 800;
+      color: var(--header-border);
+      margin-top: 10px;
+      text-shadow: 0 1px 2px rgba(235, 94, 40, 0.15);
+    }
+
+    /* Show Ledger Button */
+    #show-ledger-btn {
+      display: block;
+      width: 220px;
+      margin: 0 auto 30px;
+      padding: 12px 0;
+      background: var(--header-border);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      font-size: 1.05em;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(235, 94, 40, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    #show-ledger-btn:hover {
+      background: #d15220;
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 5px 15px rgba(235, 94, 40, 0.4);
+    }
+
+    /* Scrollable ledger container */
+    #ledger-container {
+      max-height: 65vh;
+      overflow-y: auto;
+      border: 1px solid rgba(64, 61, 57, 0.12);
+      border-radius: 10px;
+      margin-bottom: 20px;
+      position: relative;
+      box-shadow: 0 2px 10px var(--shadow);
+      background: var(--bg-primary);
+      display: none;
+    }
+
+    #ledger-container.visible {
+      display: block;
+    }
+
+    /* Scrollbar styling */
+    #ledger-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    #ledger-container::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+      border-radius: 4px;
+    }
+    #ledger-container::-webkit-scrollbar-thumb {
+      background: var(--header-border);
+      border-radius: 4px;
+    }
+    #ledger-container::-webkit-scrollbar-thumb:hover {
+      background: #d15220;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 9px 11px;
+      text-align: left;
+      font-size: 0.94em;
+      border-bottom: 1px solid rgba(64, 61, 57, 0.08);
+    }
+    
+    th {
+      background: var(--table-header-bg);
+      color: var(--table-header-text);
+      font-size: 0.86em;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    tr:hover {
+      background-color: var(--table-row-hover);
+    }
+
+    .balance-row {
+      font-weight: 700;
+      background: var(--balance-bg) !important;
+    }
+
+    .credit {
+      color: var(--credit);
+      font-weight: 700;
+    }
+
+    .debit {
+      color: var(--debit);
+      font-weight: 700;
+    }
+
+    /* Scroll to bottom button */
+    .scroll-to-bottom {
+      position: sticky;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-border);
+      color: white;
+      border: none;
+      border-radius: 22px;
+      padding: 8px 18px;
+      font-size: 0.86em;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(235, 94, 40, 0.35);
+      display: none;
+      z-index: 20;
+    }
+
+    .scroll-to-bottom.show {
+      display: block;
+    }
+
+    .scroll-to-bottom:hover {
+      background: #d15220;
+      transform: translateX(-50%) scale(1.05);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: var(--footer-text);
+      font-size: 0.88em;
+      line-height: 1.6;
+      padding: 18px;
+      border-top: 1px solid rgba(64, 61, 57, 0.08);
+    }
+
+    footer a {
+      color: var(--header-border);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      #balance-value { font-size: 1.9em; }
+      #show-ledger-btn { width: 190px; font-size: 1em; }
+      th, td { padding: 7px 9px; font-size: 0.9em; }
+      #ledger-container { max-height: 60vh; }
+      h1 { font-size: 1.7em; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>TENSORE Lab Cleaning Fund</h1>
+    <div class="last-updated">Live data from Google Sheets</div>
+  </header>
+
+  <!-- Current Balance Display -->
+  <div id="balance-display">
+    Current Lab Fund Balance<br>
+    <div id="balance-value">Loading...</div>
+  </div>
+
+  <!-- Show Ledger Button -->
+  <button id="show-ledger-btn">📊 Show Full Ledger</button>
+
+  <!-- Ledger Container (Hidden by Default) -->
+  <div id="ledger-container">
+    <table id="ledger-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Date</th>
+          <th>Debit</th>
+          <th>Credit</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody id="ledger-body">
+        <tr><td colspan="5" style="text-align: center;">Loading ledger...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button class="scroll-to-bottom" id="scrollToBottom">↓ Latest</button>
+
+  <footer>
+    Refresh page to see latest approved entries<br>
+    Source at <a href="https://github.com/ravenmojo/tensore-ledger" target="_blank">GitHub</a><br>
+    Made with ♥ by <a href="https://ravenmojo.github.io/" target="_blank">Souradeep Satpathy</a><br>
+    <a href="https://sites.google.com/view/tensore/home" target="_blank">TENSORE LAB, IIT Kharagpur</a>
+  </footer>
+
+  <script>
+    // === Data Formatting ===
+    function formatNumber(value) {
+      if (value === "" || value == null) return "—";
+      const num = parseFloat(value);
+      if (isNaN(num)) return "—";
+      return num.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "—";
+      const parts = dateStr.split('/');
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        if (!isNaN(day) && !isNaN(month) && !isNaN(year) && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
+          const date = new Date(year, month, day);
+          if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
+            return `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
+          }
+        }
+      }
+      return dateStr;
+    }
+
+    // === Show Ledger Button ===
+    const showLedgerBtn = document.getElementById('show-ledger-btn');
+    const ledgerContainer = document.getElementById('ledger-container');
+    
+    showLedgerBtn.addEventListener('click', () => {
+      ledgerContainer.classList.add('visible');
+      showLedgerBtn.style.display = 'none';
+      
+      // Auto-scroll to bottom after showing
+      setTimeout(() => {
+        const container = document.getElementById("ledger-container");
+        container.scrollTop = container.scrollHeight;
+      }, 100);
+    });
+
+    // === Scroll Management ===
+    const container = document.getElementById("ledger-container");
+    const scrollToBottomBtn = document.getElementById("scrollToBottom");
+
+    container.addEventListener("scroll", () => {
+      if (container.scrollTop > 50) {
+        scrollToBottomBtn.classList.add("show");
+      } else {
+        scrollToBottomBtn.classList.remove("show");
+      }
+    });
+
+    scrollToBottomBtn.addEventListener("click", () => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth"
+      });
+    });
+
+    // === Fetch and Render Data ===
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSIvmo5aD2rAjv245M91KCPIlVw9u5qH3K112QnJE7iVokxUEK6NiSj1TpzHWfWd_NybBljUHqf2MBA/pub?gid=0&single=true&output=csv";
+
+    Papa.parse(CSV_URL, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const balanceValue = document.getElementById("balance-value");
+        const tbody = document.getElementById("ledger-body");
+        
+        if (results.data.length === 0) {
+          balanceValue.textContent = "₹0.00";
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">No data available</td></tr>`;
+          return;
+        }
+
+        // Find the last non-empty Balance value
+        let currentBalance = "0.00";
+        for (let i = results.data.length - 1; i >= 0; i--) {
+          const row = results.data[i];
+          if (row["Balance"] && row["Balance"].toString().trim() !== "") {
+            currentBalance = row["Balance"];
+            break;
+          }
+        }
+        
+        balanceValue.textContent = "₹" + formatNumber(currentBalance);
+
+        // Render full ledger (hidden by default)
+        tbody.innerHTML = "";
+        results.data.forEach(row => {
+          const tr = document.createElement("tr");
+          const isSummaryRow = (!row["Name"] || row["Name"].toString().trim() === "") && row["Balance"];
+
+          if (isSummaryRow) {
+            tr.classList.add("balance-row");
+            tr.innerHTML = `
+              <td colspan="4" style="text-align: right;"><strong>Current Balance:</strong></td>
+              <td>${formatNumber(row["Balance"])}</td>
+            `;
+          } else {
+            const debit = row["Debit"];
+            const credit = row["Credit"];
+            tr.innerHTML = `
+              <td>${row["Name"] || "—"}</td>
+              <td>${formatDate(row["Date"])}</td>
+              <td class="${debit ? 'debit' : ''}">${formatNumber(debit)}</td>
+              <td class="${credit ? 'credit' : ''}">${formatNumber(credit)}</td>
+              <td>${formatNumber(row["Balance"])}</td>
+            `;
+          }
+          tbody.appendChild(tr);
+        });
+
+        // Update timestamp
+        document.querySelector(".last-updated").textContent = 
+          "Last updated: " + new Date().toLocaleString('en-IN');
+      },
+      error: function(error) {
+        document.getElementById("balance-value").textContent = "Error";
+        document.getElementById("ledger-body").innerHTML = 
+          `<tr><td colspan="5" style="text-align: center; color: #c53030;">Failed to load ledger</td></tr>`;
+        console.error("CSV Load Error:", error);
+      }
+    });
+  </script>
+</body>
+</html>
