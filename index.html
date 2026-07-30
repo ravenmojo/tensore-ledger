@@ -6,22 +6,39 @@
   <title>TENSORE Lab Cleaning Fund</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style id="theme-styles">
-    /* Earth-Toned Theme */
+    /* Light Theme - Earth Tones */
     :root {
-      --bg-primary: #fffcf2;          /* floral-white */
-      --bg-secondary: #fffaf5;        /* warm off-white */
-      --text-primary: #403d39;        /* charcoal-brown */
-      --text-secondary: #7a7570;      /* muted brown */
-      --header-border: #eb5e28;       /* spicy-paprika */
-      --table-header-bg: #252422;     /* carbon-black */
-      --table-header-text: #fffcf2;   /* floral-white */
-      --table-row-hover: #f8f5ee;     /* soft cream */
-      --balance-bg: #f0e9e1;          /* warm beige */
-      --credit: #2d7a4f;              /* forest green (financial standard) */
-      --debit: #c53030;               /* soft red (financial standard) */
+      --bg-primary: #fffcf2;
+      --bg-secondary: #fffaf5;
+      --text-primary: #403d39;
+      --text-secondary: #7a7570;
+      --header-border: #eb5e28;
+      --table-header-bg: #252422;
+      --table-header-text: #fffcf2;
+      --table-row-hover: #f8f5ee;
+      --balance-bg: #f0e9e1;
+      --credit: #2d7a4f;
+      --debit: #c53030;
       --footer-text: #8a8580;
       --shadow: rgba(37, 36, 34, 0.08);
       --accent-paprika: #eb5e28;
+    }
+
+    /* Dark Theme - Inverted Earth Tones */
+    .dark-mode {
+      --bg-primary: #1a1917;
+      --bg-secondary: #141311;
+      --text-primary: #f8f4e9;
+      --text-secondary: #d0c8b8;
+      --header-border: #eb5e28;
+      --table-header-bg: #2a2825;
+      --table-header-text: #f8f4e9;
+      --table-row-hover: #252320;
+      --balance-bg: #22201d;
+      --credit: #6bcf9c;
+      --debit: #f28b82;
+      --footer-text: #c0b8a8;
+      --shadow: rgba(0, 0, 0, 0.3);
     }
 
     body {
@@ -31,6 +48,7 @@
       padding: 20px;
       max-width: 1200px;
       margin: 0 auto;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     header {
@@ -39,6 +57,10 @@
       padding-bottom: 15px;
       border-bottom: 2px solid var(--header-border);
       position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
 
     header::after {
@@ -59,10 +81,28 @@
       font-size: 2.0em;
       font-weight: 700;
       letter-spacing: -0.3px;
-      background: linear-gradient(135deg, #403d39, #eb5e28);
+      background: linear-gradient(135deg, var(--text-primary), var(--header-border));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+    }
+
+    .theme-toggle {
+      background: var(--table-header-bg);
+      color: var(--table-header-text);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 0.88em;
+      font-weight: 500;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
 
     .last-updated {
@@ -83,6 +123,10 @@
       font-weight: 600;
       color: var(--text-primary);
       border: 1px solid rgba(64, 61, 57, 0.1);
+    }
+
+    .dark-mode #balance-display {
+      border: 1px solid rgba(255, 252, 242, 0.1);
     }
 
     #balance-value {
@@ -129,6 +173,10 @@
       display: none;
     }
 
+    .dark-mode #ledger-container {
+      border: 1px solid rgba(255, 252, 242, 0.1);
+    }
+
     #ledger-container.visible {
       display: block;
     }
@@ -159,6 +207,11 @@
       text-align: left;
       font-size: 0.94em;
       border-bottom: 1px solid rgba(64, 61, 57, 0.08);
+    }
+
+    .dark-mode th,
+    .dark-mode td {
+      border-bottom: 1px solid rgba(255, 252, 242, 0.08);
     }
     
     th {
@@ -211,10 +264,6 @@
       z-index: 20;
     }
 
-    .scroll-to-bottom.show {
-      display: block;
-    }
-
     .scroll-to-bottom:hover {
       background: #d15220;
       transform: translateX(-50%) scale(1.05);
@@ -228,6 +277,10 @@
       line-height: 1.6;
       padding: 18px;
       border-top: 1px solid rgba(64, 61, 57, 0.08);
+    }
+
+    .dark-mode footer {
+      border-top: 1px solid rgba(255, 252, 242, 0.08);
     }
 
     footer a {
@@ -252,6 +305,7 @@
 <body>
   <header>
     <h1>TENSORE Lab Cleaning Fund</h1>
+    <button class="theme-toggle" id="themeToggle">🌓 Toggle Theme</button>
     <div class="last-updated">Live data from Google Sheets</div>
   </header>
 
@@ -292,6 +346,24 @@
   </footer>
 
   <script>
+    // === Theme Management ===
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+
+    // Detect system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem('ledger-theme');
+
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      body.classList.add('dark-mode');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
+      const isDark = body.classList.contains('dark-mode');
+      localStorage.setItem('ledger-theme', isDark ? 'dark' : 'light');
+    });
+
     // === Data Formatting ===
     function formatNumber(value) {
       if (value === "" || value == null) return "—";
@@ -325,7 +397,6 @@
       ledgerContainer.classList.add('visible');
       showLedgerBtn.style.display = 'none';
       
-      // Auto-scroll to bottom after showing
       setTimeout(() => {
         const container = document.getElementById("ledger-container");
         container.scrollTop = container.scrollHeight;
@@ -368,7 +439,6 @@
           return;
         }
 
-        // Find the last non-empty Balance value
         let currentBalance = "0.00";
         for (let i = results.data.length - 1; i >= 0; i--) {
           const row = results.data[i];
@@ -380,7 +450,6 @@
         
         balanceValue.textContent = "₹" + formatNumber(currentBalance);
 
-        // Render full ledger (hidden by default)
         tbody.innerHTML = "";
         results.data.forEach(row => {
           const tr = document.createElement("tr");
@@ -406,14 +475,13 @@
           tbody.appendChild(tr);
         });
 
-        // Update timestamp
         document.querySelector(".last-updated").textContent = 
           "Last updated: " + new Date().toLocaleString('en-IN');
       },
       error: function(error) {
         document.getElementById("balance-value").textContent = "Error";
         document.getElementById("ledger-body").innerHTML = 
-          `<tr><td colspan="5" style="text-align: center; color: #c53030;">Failed to load ledger</td></tr>`;
+          `<tr><td colspan="5" style="text-align: center; color: var(--debit);">Failed to load ledger</td></tr>`;
         console.error("CSV Load Error:", error);
       }
     });
