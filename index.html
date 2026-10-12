@@ -34,7 +34,8 @@
   <meta property="twitter:image" content="https://ravenmojo.github.io/tensore-ledger/og-image.png" />
 
   <!-- Favicon & Mobile Touch Icons -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23eb5e28'/><text y='70' x='50' font-size='62' font-weight='800' text-anchor='middle' fill='%23fffcf2' font-family='system-ui,-apple-system,sans-serif'>T</text></svg>" />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23eb5e28'/><text y='70' x='50' font-size='62' font-weight='800' text-anchor='middle' fill='%23fffcf2' font-family='system-ui,-apple-system,sans-serif'>T</text></svg>" />
   <link rel="icon" type="image/png" sizes="192x192" href="favicon.png" />
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -113,6 +114,12 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+    }
+
+    html,
+    body {
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
     body {
@@ -759,6 +766,10 @@
     #ledger-container {
       max-height: 68vh;
       overflow-y: auto;
+      overflow-x: hidden;
+      width: 100%;
+      box-sizing: border-box;
+      -webkit-overflow-scrolling: touch;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
       margin-bottom: 20px;
@@ -1426,36 +1437,253 @@
     /* ============================
        Responsive
        ============================ */
-    @media (max-width: 600px) {
+    @media (max-width: 680px) {
       body {
-        padding: 14px;
+        padding: 14px 10px;
       }
 
       h1 {
-        font-size: 1.7em;
+        font-size: 1.6em;
       }
 
       #balance-value {
-        font-size: 2em;
+        font-size: 1.85em;
       }
 
       .form-card {
-        padding: 22px 18px;
+        padding: 20px 14px;
+      }
+
+      .tab-nav {
+        width: 100%;
+        gap: 4px;
+        padding: 4px;
       }
 
       .tab-btn {
-        padding: 9px 16px;
-        font-size: 0.85em;
+        padding: 8px 10px;
+        font-size: 0.82em;
+        flex: 1;
+        text-align: center;
       }
 
-      th,
-      td {
-        padding: 8px 10px;
-        font-size: 0.88em;
+      .ledger-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin-bottom: 10px;
+        padding: 0;
+      }
+
+      .ledger-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        gap: 6px;
+      }
+
+      .ledger-order-tag {
+        font-size: 0.78em;
+        padding: 4px 10px;
+      }
+
+      .ledger-count-badge {
+        font-size: 0.78em;
+      }
+
+      .ledger-refresh-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 7px 12px;
+        font-size: 0.82em;
       }
 
       #ledger-container {
-        max-height: 55vh;
+        max-height: 58vh;
+        overflow-x: hidden;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle);
+        background: transparent;
+        box-shadow: none;
+      }
+
+      /* Transform table into mobile-native transaction cards to prevent side scrolling */
+      #ledger-table {
+        display: block;
+        width: 100%;
+      }
+
+      #ledger-table thead {
+        display: none;
+      }
+
+      #ledger-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 2px 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      #ledger-table tr.ledger-data-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "name amount"
+          "date balance";
+        row-gap: 4px;
+        column-gap: 12px;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        padding: 12px 14px;
+        align-items: center;
+        width: 100%;
+        box-sizing: border-box;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      #ledger-table tr.ledger-data-row:hover {
+        background-color: var(--table-row-hover);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
+      #ledger-table tr.ledger-data-row td {
+        padding: 0;
+        border: none;
+        background: transparent;
+      }
+
+      #ledger-table tr.ledger-data-row .col-name {
+        grid-area: name;
+        font-weight: 700;
+        font-size: 0.94em;
+        color: var(--text-primary);
+        line-height: 1.35;
+        word-break: break-word;
+      }
+
+      #ledger-table tr.ledger-data-row .col-date {
+        grid-area: date;
+        font-size: 0.8em;
+        color: var(--text-muted);
+        display: block;
+      }
+
+      /* Amount display on mobile: show active Debit or Credit */
+      #ledger-table tr.ledger-data-row .col-debit.has-value {
+        grid-area: amount;
+        text-align: right;
+        font-weight: 800;
+        font-size: 0.96em;
+        color: var(--debit);
+      }
+
+      #ledger-table tr.ledger-data-row .col-debit.has-value::before {
+        content: "-₹";
+        font-size: 0.9em;
+      }
+
+      #ledger-table tr.ledger-data-row .col-credit.has-value {
+        grid-area: amount;
+        text-align: right;
+        font-weight: 800;
+        font-size: 0.96em;
+        color: var(--credit);
+      }
+
+      #ledger-table tr.ledger-data-row .col-credit.has-value::before {
+        content: "+₹";
+        font-size: 0.9em;
+      }
+
+      #ledger-table tr.ledger-data-row .col-debit.empty,
+      #ledger-table tr.ledger-data-row .col-credit.empty {
+        display: none;
+      }
+
+      /* If an entry has neither credit nor debit */
+      #ledger-table tr.ledger-data-row[data-entry-type="none"] .col-credit.empty {
+        display: block;
+        grid-area: amount;
+        text-align: right;
+        color: var(--text-muted);
+      }
+
+      /* Running balance on mobile */
+      #ledger-table tr.ledger-data-row .col-balance {
+        grid-area: balance;
+        text-align: right;
+        font-size: 0.82em;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      #ledger-table tr.ledger-data-row .col-balance::before {
+        content: "Bal: ₹";
+        font-weight: 500;
+        color: var(--text-muted);
+        font-size: 0.9em;
+      }
+
+      /* Summary row on mobile */
+      #ledger-table tr.balance-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--balance-bg) !important;
+        border: 1px solid rgba(235, 94, 40, 0.25);
+        border-radius: var(--radius-sm);
+        padding: 12px 14px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      #ledger-table tr.balance-row td {
+        padding: 0;
+        border: none;
+        background: transparent;
+      }
+
+      #ledger-table tr.balance-row .col-summary-label {
+        font-weight: 700;
+        font-size: 0.9em;
+        color: var(--text-primary);
+        text-align: left !important;
+      }
+
+      #ledger-table tr.balance-row .col-summary-val {
+        font-weight: 800;
+        font-size: 1.05em;
+        color: var(--header-border);
+      }
+
+      #ledger-table tr.balance-row .col-summary-val::before {
+        content: "₹";
+      }
+
+      /* Loading and sentinel rows on mobile */
+      #ledger-table tr#ledger-sentinel-row,
+      #ledger-table tr.loading-row {
+        display: block;
+        width: 100%;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+      }
+
+      #ledger-table tr#ledger-sentinel-row td,
+      #ledger-table tr.loading-row td {
+        display: block;
+        width: 100%;
+        border: none;
+        box-sizing: border-box;
+        text-align: center;
       }
 
       .card-top {
@@ -1498,7 +1726,8 @@
   <div class="tab-content active" id="tab-contribute">
     <div class="form-card">
       <h2>Submit Contribution</h2>
-      <p class="form-subtitle" id="form-subtitle">Upload your UPI payment screenshot and the amount & date will be auto-detected. Your
+      <p class="form-subtitle" id="form-subtitle">Upload your UPI payment screenshot and the amount & date will be
+        auto-detected. Your
         entry will appear in the ledger after admin approval.</p>
 
       <form id="contribution-form" autocomplete="off">
@@ -1515,7 +1744,7 @@
             <button type="button" class="payment-type-btn active" data-method="upi" id="method-upi-btn">
               <span class="type-icon">📱</span>
               <span>UPI Payment</span>
-              <span class="type-desc">Auto-detect from screenshot</span>
+              <span class="type-desc">Details auto-detected from screenshot</span>
             </button>
             <button type="button" class="payment-type-btn" data-method="cash" id="method-cash-btn">
               <span class="type-icon">💵</span>
@@ -1617,7 +1846,7 @@
           </tr>
         </thead>
         <tbody id="ledger-body">
-          <tr>
+          <tr class="loading-row">
             <td colspan="5" style="text-align: center; padding: 30px;">Loading ledger...</td>
           </tr>
         </tbody>
@@ -2199,20 +2428,35 @@
         const isSummaryRow = (!row["Name"] || row["Name"].toString().trim() === "") && row["Balance"];
 
         if (isSummaryRow) {
-          tr.classList.add("balance-row");
+          tr.className = "balance-row";
           tr.innerHTML = `
-            <td colspan="4" style="text-align: right;"><strong>Balance:</strong></td>
-            <td>${formatNumber(row["Balance"])}</td>
+            <td colspan="4" class="col-summary-label" style="text-align: right;"><strong>Balance:</strong></td>
+            <td class="col-summary-val"><strong>${formatNumber(row["Balance"])}</strong></td>
           `;
         } else {
           const debit = row["Debit"] ? row["Debit"].toString().trim() : "";
           const credit = row["Credit"] ? row["Credit"].toString().trim() : "";
+          const hasDebit = Boolean(debit && debit !== "0" && debit !== "—" && debit !== "0.00");
+          const hasCredit = Boolean(credit && credit !== "0" && credit !== "—" && credit !== "0.00");
+
+          let entryType = "none";
+          if (hasCredit && !hasDebit) entryType = "credit";
+          else if (hasDebit && !hasCredit) entryType = "debit";
+          else if (hasDebit && hasCredit) entryType = "both";
+
+          tr.className = "ledger-data-row";
+          tr.dataset.entryType = entryType;
+
+          const debitVal = hasDebit ? formatNumber(debit) : "—";
+          const creditVal = hasCredit ? formatNumber(credit) : "—";
+          const balanceVal = formatNumber(row["Balance"]);
+
           tr.innerHTML = `
-            <td>${escapeHtml(row["Name"] || "—")}</td>
-            <td>${escapeHtml(formatDate(row["Date"]))}</td>
-            <td class="${debit ? 'debit' : ''}">${formatNumber(debit)}</td>
-            <td class="${credit ? 'credit' : ''}">${formatNumber(credit)}</td>
-            <td>${formatNumber(row["Balance"])}</td>
+            <td class="col-name" data-label="Name">${escapeHtml(row["Name"] || "—")}</td>
+            <td class="col-date" data-label="Date">${escapeHtml(formatDate(row["Date"]))}</td>
+            <td class="col-debit ${hasDebit ? 'debit has-value' : 'empty'}" data-label="Debit">${debitVal}</td>
+            <td class="col-credit ${hasCredit ? 'credit has-value' : 'empty'}" data-label="Credit">${creditVal}</td>
+            <td class="col-balance" data-label="Balance">${balanceVal}</td>
           `;
         }
         fragment.appendChild(tr);
@@ -2282,7 +2526,7 @@
       const balanceValue = document.getElementById("balance-value");
       const tbody = document.getElementById("ledger-body");
 
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px;">Loading ledger...</td></tr>`;
+      tbody.innerHTML = `<tr class="loading-row"><td colspan="5" style="text-align: center; padding: 30px;">Loading ledger...</td></tr>`;
       if (ledgerCountBadge) ledgerCountBadge.textContent = "Loading entries...";
 
       Papa.parse(CSV_URL, {
@@ -2292,7 +2536,7 @@
         complete: function (results) {
           if (!results.data || results.data.length === 0) {
             balanceValue.textContent = "₹0.00";
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px;">No entries available</td></tr>`;
+            tbody.innerHTML = `<tr class="loading-row"><td colspan="5" style="text-align: center; padding: 30px;">No entries available</td></tr>`;
             if (ledgerCountBadge) ledgerCountBadge.textContent = "0 entries";
             return;
           }
@@ -2339,7 +2583,7 @@
             ? "⚠️ <strong>CORS Error:</strong> Browsers block Google Sheets data when opened via <code>file:///</code>.<br>Run via a local web server (e.g. <code>python -m http.server</code>) or view on GitHub Pages."
             : "Failed to load ledger. Please check your network connection.";
           tbody.innerHTML =
-            `<tr><td colspan="5" style="text-align: center; color: var(--debit); padding: 20px; line-height: 1.6;">${msg}</td></tr>`;
+            `<tr class="loading-row"><td colspan="5" style="text-align: center; color: var(--debit); padding: 20px; line-height: 1.6;">${msg}</td></tr>`;
           if (ledgerCountBadge) ledgerCountBadge.textContent = "Error loading";
           console.error("CSV Load Error:", error);
         }
