@@ -1,66 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TENSORE Lab Cleaning Fund</title>
+  <meta name="description"
+    content="TENSORE Lab Cleaning Fund ledger — contribute and track lab fund transactions at IIT Kharagpur." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <style id="theme-styles">
-    /* Light Theme - Earth Tones */
+  <style>
+    /* ============================
+       Design Tokens
+       ============================ */
     :root {
       --bg-primary: #fffcf2;
-      --bg-secondary: #fffaf5;
+      --bg-secondary: #f8f5ee;
+      --bg-glass: rgba(255, 252, 242, 0.7);
       --text-primary: #403d39;
       --text-secondary: #7a7570;
+      --text-muted: #a09890;
       --header-border: #eb5e28;
+      --accent-glow: rgba(235, 94, 40, 0.15);
       --table-header-bg: #252422;
       --table-header-text: #fffcf2;
-      --table-row-hover: #f8f5ee;
+      --table-row-hover: rgba(235, 94, 40, 0.04);
       --balance-bg: #f0e9e1;
       --credit: #2d7a4f;
       --debit: #c53030;
       --footer-text: #8a8580;
-      --shadow: rgba(37, 36, 34, 0.08);
-      --accent-paprika: #eb5e28;
+      --shadow-sm: 0 1px 3px rgba(37, 36, 34, 0.06);
+      --shadow-md: 0 4px 16px rgba(37, 36, 34, 0.08);
+      --shadow-lg: 0 8px 32px rgba(37, 36, 34, 0.12);
+      --shadow-glow: 0 0 24px rgba(235, 94, 40, 0.2);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-pill: 50px;
+      --border-subtle: rgba(64, 61, 57, 0.1);
+      --success: #2d7a4f;
+      --success-bg: rgba(45, 122, 79, 0.08);
+      --error: #c53030;
+      --error-bg: rgba(197, 48, 48, 0.08);
+      --warning: #d97706;
+      --warning-bg: rgba(217, 119, 6, 0.08);
     }
 
-    /* Dark Theme - Inverted Earth Tones */
     .dark-mode {
       --bg-primary: #1a1917;
       --bg-secondary: #141311;
+      --bg-glass: rgba(26, 25, 23, 0.8);
       --text-primary: #f8f4e9;
       --text-secondary: #d0c8b8;
-      --header-border: #eb5e28;
+      --text-muted: #8a8275;
       --table-header-bg: #2a2825;
       --table-header-text: #f8f4e9;
-      --table-row-hover: #252320;
+      --table-row-hover: rgba(235, 94, 40, 0.06);
       --balance-bg: #22201d;
       --credit: #6bcf9c;
       --debit: #f28b82;
       --footer-text: #c0b8a8;
-      --shadow: rgba(0, 0, 0, 0.3);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --border-subtle: rgba(255, 252, 242, 0.08);
+      --success-bg: rgba(107, 207, 156, 0.1);
+      --error-bg: rgba(242, 139, 130, 0.1);
+      --warning-bg: rgba(217, 119, 6, 0.12);
+    }
+
+    /* ============================
+       Base
+       ============================ */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
       background-color: var(--bg-secondary);
       color: var(--text-primary);
       padding: 20px;
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.4s ease, color 0.4s ease;
+      -webkit-font-smoothing: antialiased;
     }
 
+    /* ============================
+       Header
+       ============================ */
     header {
       text-align: center;
-      margin-bottom: 25px;
-      padding-bottom: 15px;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
       border-bottom: 2px solid var(--header-border);
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
     header::after {
@@ -71,16 +116,14 @@
       transform: translateX(-50%);
       width: 60px;
       height: 2px;
-      background: var(--accent-paprika);
+      background: var(--header-border);
       border-radius: 1px;
     }
 
     h1 {
-      color: var(--text-primary);
-      margin: 0;
-      font-size: 2.0em;
-      font-weight: 700;
-      letter-spacing: -0.3px;
+      font-size: 2.2em;
+      font-weight: 800;
+      letter-spacing: -0.5px;
       background: linear-gradient(135deg, var(--text-primary), var(--header-border));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -91,108 +134,548 @@
       background: var(--table-header-bg);
       color: var(--table-header-text);
       border: none;
-      padding: 6px 12px;
-      border-radius: 18px;
+      padding: 7px 16px;
+      border-radius: var(--radius-pill);
       cursor: pointer;
-      font-size: 0.88em;
-      font-weight: 500;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      font-size: 0.85em;
+      font-weight: 600;
+      font-family: inherit;
+      box-shadow: var(--shadow-sm);
       transition: all 0.3s ease;
     }
 
     .theme-toggle:hover {
       transform: translateY(-1px);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      box-shadow: var(--shadow-md);
     }
 
     .last-updated {
-      font-size: 0.88em;
-      color: var(--text-secondary);
-      margin-top: 8px;
+      font-size: 0.85em;
+      color: var(--text-muted);
     }
 
-    /* Balance Display */
+    /* ============================
+       Balance Card
+       ============================ */
     #balance-display {
       text-align: center;
-      padding: 30px 20px;
-      background: var(--balance-bg);
-      border-radius: 12px;
-      margin-bottom: 25px;
-      box-shadow: 0 3px 12px var(--shadow);
-      font-size: 1.4em;
+      padding: 36px 24px 32px;
+      background: var(--bg-primary);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius-lg);
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-subtle);
+      font-size: 1.1em;
       font-weight: 600;
-      color: var(--text-primary);
-      border: 1px solid rgba(64, 61, 57, 0.1);
+      color: var(--text-secondary);
+      position: relative;
+      overflow: hidden;
     }
 
-    .dark-mode #balance-display {
-      border: 1px solid rgba(255, 252, 242, 0.1);
+    #balance-display::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--header-border), transparent);
     }
 
     #balance-value {
-      font-size: 2.4em;
+      font-size: 2.6em;
       font-weight: 800;
       color: var(--header-border);
-      margin-top: 10px;
-      text-shadow: 0 1px 2px rgba(235, 94, 40, 0.15);
+      margin-top: 8px;
+      letter-spacing: -1px;
     }
 
-    /* Show Ledger Button */
-    #show-ledger-btn {
-      display: block;
-      width: 220px;
-      margin: 0 auto 30px;
-      padding: 12px 0;
-      background: var(--header-border);
-      color: white;
+    /* ============================
+       Tab Navigation
+       ============================ */
+    .tab-nav {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 28px;
+      background: var(--bg-primary);
+      border-radius: var(--radius-pill);
+      padding: 5px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-subtle);
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tab-btn {
+      padding: 10px 24px;
       border: none;
-      border-radius: 24px;
-      font-size: 1.05em;
+      border-radius: var(--radius-pill);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.92em;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 3px 10px rgba(235, 94, 40, 0.3);
       transition: all 0.3s ease;
-    }
-
-    #show-ledger-btn:hover {
-      background: #d15220;
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 5px 15px rgba(235, 94, 40, 0.4);
-    }
-
-    /* Scrollable ledger container */
-    #ledger-container {
-      max-height: 65vh;
-      overflow-y: auto;
-      border: 1px solid rgba(64, 61, 57, 0.12);
-      border-radius: 10px;
-      margin-bottom: 20px;
       position: relative;
-      box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--header-border);
+      color: white;
+      box-shadow: 0 2px 8px rgba(235, 94, 40, 0.3);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeSlideIn 0.4s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ============================
+       Contribution Form
+       ============================ */
+    .form-card {
       background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-subtle);
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .form-card h2 {
+      font-size: 1.3em;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+
+    .form-subtitle {
+      font-size: 0.88em;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.86em;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      letter-spacing: 0.2px;
+    }
+
+    .form-group label .required {
+      color: var(--header-border);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.95em;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--header-border);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Upload Zone */
+    .upload-zone {
+      border: 2px dashed var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--bg-secondary);
+      position: relative;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--header-border);
+      background: var(--accent-glow);
+    }
+
+    .upload-zone.has-file {
+      border-style: solid;
+      border-color: var(--success);
+      background: var(--success-bg);
+    }
+
+    .upload-icon {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .upload-text {
+      font-size: 0.9em;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .upload-text strong {
+      color: var(--header-border);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* Screenshot Preview */
+    .preview-container {
+      margin-top: 16px;
+      display: none;
+      position: relative;
+    }
+
+    .preview-container.visible {
+      display: block;
+      animation: fadeSlideIn 0.4s ease;
+    }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 280px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+      display: block;
+      margin: 0 auto;
+    }
+
+    .preview-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--debit);
+      color: white;
+      border: none;
+      font-size: 1em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease;
+    }
+
+    .preview-remove:hover {
+      transform: scale(1.1);
+    }
+
+    /* OCR Status */
+    .ocr-status {
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.86em;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      line-height: 1.4;
+    }
+
+    .ocr-status.visible {
+      display: flex;
+      animation: fadeSlideIn 0.3s ease;
+    }
+
+    .ocr-status.loading {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid rgba(217, 119, 6, 0.15);
+    }
+
+    .ocr-status.success {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(45, 122, 79, 0.15);
+    }
+
+    .ocr-status.error {
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid rgba(197, 48, 48, 0.15);
+    }
+
+    .ocr-spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(217, 119, 6, 0.2);
+      border-top-color: var(--warning);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Extracted Fields */
+    .extracted-fields {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--success-bg);
+      border: 1px solid rgba(45, 122, 79, 0.15);
+      border-radius: var(--radius-sm);
       display: none;
     }
 
-    .dark-mode #ledger-container {
-      border: 1px solid rgba(255, 252, 242, 0.1);
+    .extracted-fields.visible {
+      display: block;
+      animation: fadeSlideIn 0.4s ease;
     }
 
-    #ledger-container.visible {
+    .extracted-fields h4 {
+      font-size: 0.82em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--success);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .extracted-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 0.9em;
+    }
+
+    .extracted-row span:first-child {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .extracted-row span:last-child {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Submit Button */
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, var(--header-border), #d15220);
+      color: white;
+      font-family: inherit;
+      font-size: 1.05em;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(235, 94, 40, 0.3);
+      transition: all 0.3s ease;
+      margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(235, 94, 40, 0.4);
+    }
+
+    .submit-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .submit-btn .btn-loader {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    .submit-btn.loading .btn-text {
+      display: none;
+    }
+
+    .submit-btn.loading .btn-loader {
+      display: inline-block;
+    }
+
+    /* Form Result Toast */
+    .form-toast {
+      margin-top: 16px;
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9em;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+      animation: fadeSlideIn 0.4s ease;
+    }
+
+    .form-toast.visible {
       display: block;
     }
 
-    /* Scrollbar styling */
-    #ledger-container::-webkit-scrollbar {
-      width: 8px;
+    .form-toast.success {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(45, 122, 79, 0.15);
     }
+
+    .form-toast.error {
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid rgba(197, 48, 48, 0.15);
+    }
+
+    /* ============================
+       Ledger Table & Toolbar
+       ============================ */
+    .ledger-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 0 4px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .ledger-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88em;
+      color: var(--text-secondary);
+    }
+
+    .ledger-order-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 5px 12px;
+      font-weight: 600;
+      font-size: 0.84em;
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ledger-count-badge {
+      font-weight: 500;
+      color: var(--text-muted);
+      font-size: 0.85em;
+    }
+
+    .ledger-refresh-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 5px 14px;
+      font-size: 0.82em;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ledger-refresh-btn:hover {
+      background: var(--bg-primary);
+      color: var(--header-border);
+      border-color: var(--header-border);
+      transform: translateY(-1px);
+    }
+
+    #ledger-container {
+      max-height: 68vh;
+      overflow-y: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+      position: relative;
+      box-shadow: var(--shadow-md);
+      background: var(--bg-primary);
+      display: block;
+      animation: fadeSlideIn 0.3s ease;
+    }
+
+    #ledger-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
     #ledger-container::-webkit-scrollbar-track {
       background: var(--bg-secondary);
-      border-radius: 4px;
+      border-radius: 3px;
     }
+
     #ledger-container::-webkit-scrollbar-thumb {
       background: var(--header-border);
-      border-radius: 4px;
+      border-radius: 3px;
     }
+
     #ledger-container::-webkit-scrollbar-thumb:hover {
       background: #d15220;
     }
@@ -202,25 +685,21 @@
       border-collapse: collapse;
     }
 
-    th, td {
-      padding: 9px 11px;
+    th,
+    td {
+      padding: 10px 14px;
       text-align: left;
-      font-size: 0.94em;
-      border-bottom: 1px solid rgba(64, 61, 57, 0.08);
+      font-size: 0.92em;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
-    .dark-mode th,
-    .dark-mode td {
-      border-bottom: 1px solid rgba(255, 252, 242, 0.08);
-    }
-    
     th {
       background: var(--table-header-bg);
       color: var(--table-header-text);
-      font-size: 0.86em;
+      font-size: 0.82em;
       text-transform: uppercase;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
       position: sticky;
       top: 0;
       z-index: 10;
@@ -245,8 +724,7 @@
       font-weight: 700;
     }
 
-    /* Scroll to bottom button */
-    .scroll-to-bottom {
+    .scroll-to-top-btn {
       position: sticky;
       bottom: 20px;
       left: 50%;
@@ -254,54 +732,641 @@
       background: var(--header-border);
       color: white;
       border: none;
-      border-radius: 22px;
+      border-radius: var(--radius-pill);
       padding: 8px 18px;
-      font-size: 0.86em;
+      font-size: 0.84em;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
       box-shadow: 0 2px 8px rgba(235, 94, 40, 0.35);
       display: none;
       z-index: 20;
+      transition: all 0.2s ease;
     }
 
-    .scroll-to-bottom:hover {
+    .scroll-to-top-btn:hover {
       background: #d15220;
       transform: translateX(-50%) scale(1.05);
     }
 
+    /* ============================
+       Footer
+       ============================ */
     footer {
       text-align: center;
-      margin-top: 30px;
+      margin-top: 40px;
       color: var(--footer-text);
-      font-size: 0.88em;
-      line-height: 1.6;
-      padding: 18px;
-      border-top: 1px solid rgba(64, 61, 57, 0.08);
-    }
-
-    .dark-mode footer {
-      border-top: 1px solid rgba(255, 252, 242, 0.08);
+      font-size: 0.85em;
+      line-height: 1.7;
+      padding: 20px;
+      border-top: 1px solid var(--border-subtle);
     }
 
     footer a {
       color: var(--header-border);
       text-decoration: none;
       font-weight: 600;
+      transition: color 0.2s ease;
     }
 
     footer a:hover {
       text-decoration: underline;
     }
 
+    /* ============================
+       Admin Panel
+       ============================ */
+    .admin-gate {
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .admin-gate .lock-icon {
+      font-size: 3em;
+      margin-bottom: 12px;
+      display: block;
+      opacity: 0.7;
+    }
+
+    .admin-gate h2 {
+      font-size: 1.2em;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .admin-gate p {
+      font-size: 0.88em;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .pin-row {
+      display: flex;
+      gap: 8px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .pin-row .form-input {
+      flex: 1;
+      text-align: center;
+      font-size: 1.1em;
+      letter-spacing: 4px;
+    }
+
+    .pin-unlock-btn {
+      padding: 11px 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--header-border);
+      color: white;
+      font-family: inherit;
+      font-size: 0.95em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .pin-unlock-btn:hover {
+      background: #d15220;
+      transform: translateY(-1px);
+    }
+
+    .admin-error {
+      margin-top: 12px;
+      font-size: 0.86em;
+      color: var(--debit);
+      min-height: 20px;
+    }
+
+    /* Unlocked Admin */
+    .admin-panel {
+      display: none;
+    }
+
+    .admin-panel.visible {
+      display: block;
+      animation: fadeSlideIn 0.4s ease;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .admin-header h2 {
+      font-size: 1.25em;
+      font-weight: 700;
+    }
+
+    .admin-header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .admin-refresh-btn,
+    .admin-logout-btn {
+      padding: 7px 16px;
+      border: none;
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 0.82em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .admin-refresh-btn {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(45, 122, 79, 0.15);
+    }
+
+    .admin-refresh-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .admin-logout-btn {
+      background: var(--error-bg);
+      color: var(--debit);
+      border: 1px solid rgba(197, 48, 48, 0.15);
+    }
+
+    .admin-logout-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pending-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--header-border);
+      color: white;
+      font-size: 0.7em;
+      font-weight: 800;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    /* Submission Cards */
+    .submissions-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .submission-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submission-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--warning);
+    }
+
+    .submission-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .submission-card.processing {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .submission-card.approved {
+      border-color: var(--success);
+    }
+
+    .submission-card.approved::before {
+      background: var(--success);
+    }
+
+    .submission-card.rejected::before {
+      background: var(--debit);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      gap: 12px;
+    }
+
+    .card-info h3 {
+      font-size: 1.05em;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .card-meta {
+      font-size: 0.82em;
+      color: var(--text-muted);
+    }
+
+    .card-amount {
+      font-size: 1.4em;
+      font-weight: 800;
+      color: var(--success);
+      white-space: nowrap;
+    }
+
+    .card-details {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .card-detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .card-detail-item .detail-label {
+      font-size: 0.75em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .card-detail-item .detail-value {
+      font-size: 0.92em;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Screenshot thumbnail in card */
+    .card-screenshot {
+      flex-shrink: 0;
+    }
+
+    .card-screenshot a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--header-border);
+      font-size: 0.85em;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .card-screenshot a:hover {
+      background: var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .card-action-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.9em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .card-action-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .card-action-btn.approve {
+      background: var(--success);
+      color: white;
+      box-shadow: 0 2px 8px rgba(45, 122, 79, 0.3);
+    }
+
+    .card-action-btn.approve:hover {
+      box-shadow: 0 4px 14px rgba(45, 122, 79, 0.4);
+    }
+
+    .card-action-btn.reject {
+      background: var(--error-bg);
+      color: var(--debit);
+      border: 1px solid rgba(197, 48, 48, 0.15);
+    }
+
+    .card-action-btn.reject:hover {
+      background: var(--debit);
+      color: white;
+      box-shadow: 0 4px 14px rgba(197, 48, 48, 0.3);
+    }
+
+    .card-action-btn.edit {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .card-action-btn.edit:hover,
+    .card-action-btn.edit.active {
+      background: var(--bg-primary);
+      border-color: var(--header-border);
+      color: var(--header-border);
+    }
+
+    .card-action-btn.save-only {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .card-action-btn.save-only:hover {
+      background: var(--bg-primary);
+      border-color: var(--header-border);
+      color: var(--header-border);
+    }
+
+    .card-action-btn.cancel {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .card-action-btn.cancel:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    /* Inline Edit Panel */
+    .card-edit-panel {
+      display: none;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-top: 10px;
+      margin-bottom: 12px;
+      animation: fadeSlideIn 0.25s ease;
+    }
+
+    .card-edit-title {
+      font-size: 0.82em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--header-border);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-edit-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .card-edit-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-edit-field.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .card-edit-field label {
+      font-size: 0.74em;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .card-inline-input {
+      padding: 8px 10px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9em;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .card-inline-input:focus {
+      outline: none;
+      border-color: var(--header-border);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .card-edit-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-badge-saved {
+      display: none;
+      font-size: 0.75em;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      background: var(--success-bg);
+      color: var(--success);
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    .card-result {
+      text-align: center;
+      padding: 10px;
+      font-weight: 700;
+      font-size: 0.9em;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 14px;
+    }
+
+    .card-result.approved-msg {
+      color: var(--success);
+    }
+
+    .card-result.rejected-msg {
+      color: var(--debit);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 3em;
+      margin-bottom: 12px;
+      display: block;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      font-size: 0.95em;
+      line-height: 1.5;
+    }
+
+    .admin-loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 0.95em;
+    }
+
+    .admin-loading .ocr-spinner {
+      margin: 0 auto 12px;
+      border-color: rgba(235, 94, 40, 0.15);
+      border-top-color: var(--header-border);
+      width: 28px;
+      height: 28px;
+    }
+
+    /* Screenshot Modal */
+    .screenshot-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .screenshot-modal.visible {
+      display: flex;
+      animation: fadeSlideIn 0.3s ease;
+    }
+
+    .screenshot-modal img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .screenshot-modal-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: none;
+      font-size: 1.3em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .screenshot-modal-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* ============================
+       Responsive
+       ============================ */
     @media (max-width: 600px) {
-      #balance-value { font-size: 1.9em; }
-      #show-ledger-btn { width: 190px; font-size: 1em; }
-      th, td { padding: 7px 9px; font-size: 0.9em; }
-      #ledger-container { max-height: 60vh; }
-      h1 { font-size: 1.7em; }
+      body {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 1.7em;
+      }
+
+      #balance-value {
+        font-size: 2em;
+      }
+
+      .form-card {
+        padding: 22px 18px;
+      }
+
+      .tab-btn {
+        padding: 9px 16px;
+        font-size: 0.85em;
+      }
+
+      th,
+      td {
+        padding: 8px 10px;
+        font-size: 0.88em;
+      }
+
+      #ledger-container {
+        max-height: 55vh;
+      }
+
+      .card-top {
+        flex-direction: column;
+      }
+
+      .card-actions {
+        flex-direction: column;
+      }
+
+      .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
+
 <body>
   <header>
     <h1>TENSORE Lab Cleaning Fund</h1>
@@ -315,73 +1380,574 @@
     <div id="balance-value">Loading...</div>
   </div>
 
-  <!-- Show Ledger Button -->
-  <button id="show-ledger-btn">📊 Show Full Ledger</button>
+  <!-- Tab Navigation -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="contribute" id="tab-contribute-btn">💰 Contribute</button>
+    <button class="tab-btn" data-tab="ledger" id="tab-ledger-btn">📊 View Ledger</button>
+    <button class="tab-btn" data-tab="admin" id="tab-admin-btn">🔒 Admin</button>
+  </nav>
 
-  <!-- Ledger Container (Hidden by Default) -->
-  <div id="ledger-container">
-    <table id="ledger-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Date</th>
-          <th>Debit</th>
-          <th>Credit</th>
-          <th>Balance</th>
-        </tr>
-      </thead>
-      <tbody id="ledger-body">
-        <tr><td colspan="5" style="text-align: center;">Loading ledger...</td></tr>
-      </tbody>
-    </table>
+  <!-- ==================== TAB: Contribute ==================== -->
+  <div class="tab-content active" id="tab-contribute">
+    <div class="form-card">
+      <h2>Submit Contribution</h2>
+      <p class="form-subtitle">Upload your UPI payment screenshot and the amount & date will be auto-detected. Your
+        entry will appear in the ledger after admin approval.</p>
+
+      <form id="contribution-form" autocomplete="off">
+        <!-- Name -->
+        <div class="form-group">
+          <label for="contrib-name">Your Name <span class="required">*</span></label>
+          <input type="text" id="contrib-name" class="form-input" placeholder="e.g. Rahul Sharma" required />
+        </div>
+
+        <!-- Screenshot Upload -->
+        <div class="form-group">
+          <label>UPI Transaction Screenshot <span class="required">*</span></label>
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" id="screenshot-input" accept="image/*" />
+            <span class="upload-icon">📸</span>
+            <div class="upload-text">
+              <strong>Click to upload</strong> or drag & drop<br>
+              PNG, JPG up to 5 MB
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div class="preview-container" id="preview-container">
+            <img class="preview-img" id="preview-img" alt="Screenshot preview" />
+            <button type="button" class="preview-remove" id="preview-remove" title="Remove">✕</button>
+          </div>
+
+          <!-- OCR Status -->
+          <div class="ocr-status" id="ocr-status">
+            <div class="ocr-spinner"></div>
+            <span id="ocr-status-text">Analyzing screenshot...</span>
+          </div>
+
+          <!-- Extracted Fields -->
+          <div class="extracted-fields" id="extracted-fields">
+            <h4>✓ Auto-Detected from Screenshot</h4>
+            <div class="extracted-row">
+              <span>Amount</span>
+              <span id="extracted-amount">—</span>
+            </div>
+            <div class="extracted-row">
+              <span>Date</span>
+              <span id="extracted-date">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amount (auto-filled or manual) -->
+        <div class="form-group">
+          <label for="contrib-amount">Amount (₹) <span class="required">*</span></label>
+          <input type="number" id="contrib-amount" class="form-input" placeholder="e.g. 200" min="1" step="1"
+            required />
+        </div>
+
+        <!-- Date (auto-filled or manual) -->
+        <div class="form-group">
+          <label for="contrib-date">Transaction Date <span class="required">*</span></label>
+          <input type="date" id="contrib-date" class="form-input" required />
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="submit-btn" id="submit-btn">
+          <span class="btn-text">Submit for Approval</span>
+          <span class="btn-loader"></span>
+        </button>
+      </form>
+
+      <!-- Toast -->
+      <div class="form-toast" id="form-toast"></div>
+    </div>
   </div>
 
-  <button class="scroll-to-bottom" id="scrollToBottom">↓ Latest</button>
+  <!-- ==================== TAB: Ledger ==================== -->
+  <div class="tab-content" id="tab-ledger">
+    <div class="ledger-toolbar">
+      <div class="ledger-info">
+        <span class="ledger-order-tag">⚡ Latest to Oldest</span>
+        <span class="ledger-count-badge" id="ledger-count-badge">Loading entries...</span>
+      </div>
+      <button type="button" class="ledger-refresh-btn" id="ledger-refresh-btn" title="Refresh ledger data">🔄
+        Refresh</button>
+    </div>
+    <div id="ledger-container">
+      <table id="ledger-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Date</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody id="ledger-body">
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 30px;">Loading ledger...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="scroll-to-top-btn" id="scrollToTopBtn" title="Scroll to latest entries">↑ Top (Latest)</button>
+  </div>
+
+  <!-- ==================== TAB: Admin ==================== -->
+  <div class="tab-content" id="tab-admin">
+    <!-- PIN Gate -->
+    <div class="admin-gate" id="admin-gate">
+      <div class="form-card">
+        <span class="lock-icon">🔐</span>
+        <h2>Admin Access</h2>
+        <p>Enter the admin PIN to review and approve pending contributions.</p>
+        <div class="pin-row">
+          <input type="password" id="admin-pin" class="form-input" placeholder="••••••" maxlength="20" />
+          <button type="button" class="pin-unlock-btn" id="admin-unlock-btn">Unlock</button>
+        </div>
+        <div class="admin-error" id="admin-error"></div>
+      </div>
+    </div>
+
+    <!-- Unlocked Admin Panel -->
+    <div class="admin-panel" id="admin-panel">
+      <div class="admin-header">
+        <h2>Pending Submissions <span class="pending-count" id="pending-count" style="display:none;">0</span></h2>
+        <div class="admin-header-actions">
+          <button class="admin-refresh-btn" id="admin-refresh-btn">🔄 Refresh</button>
+          <button class="admin-logout-btn" id="admin-logout-btn">🚪 Lock</button>
+        </div>
+      </div>
+      <div id="admin-content">
+        <div class="admin-loading">
+          <div class="ocr-spinner"></div>
+          Loading submissions...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screenshot Modal -->
+  <div class="screenshot-modal" id="screenshot-modal">
+    <button class="screenshot-modal-close" id="screenshot-modal-close">✕</button>
+    <img id="screenshot-modal-img" alt="Transaction screenshot" />
+  </div>
 
   <footer>
-    Refresh page to see latest approved entries<br>
+    Entries appear after admin approval · Refresh page for latest data<br>
     Source at <a href="https://github.com/ravenmojo/tensore-ledger" target="_blank">GitHub</a><br>
     Made with ♥ by <a href="https://ravenmojo.github.io/" target="_blank">Souradeep Satpathy</a><br>
     <a href="https://sites.google.com/view/tensore/home" target="_blank">TENSORE LAB, IIT Kharagpur</a>
   </footer>
 
-  <script>
-    // === Theme Management ===
-    const themeToggle = document.getElementById('themeToggle');
-    const body = document.body;
+  <!-- ==================== Tesseract.js (OCR) ==================== -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-    // Detect system preference
+  <script>
+    // =================================================================
+    //  CONFIG — Replace with your deployed Apps Script URL
+    // =================================================================
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyIbwfFfAhEKLzjE1t0OQXvXnlZRDcwU215evnu4noe_xAXcX7Ok6zn8bjlO9Ghe50tpA/exec";
+
+    // =================================================================
+    //  Theme
+    // =================================================================
+    const themeToggle = document.getElementById('themeToggle');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const savedTheme = localStorage.getItem('ledger-theme');
-
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      body.classList.add('dark-mode');
+      document.body.classList.add('dark-mode');
     }
-
     themeToggle.addEventListener('click', () => {
-      body.classList.toggle('dark-mode');
-      const isDark = body.classList.contains('dark-mode');
-      localStorage.setItem('ledger-theme', isDark ? 'dark' : 'light');
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('ledger-theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     });
 
-    // === Data Formatting ===
+    // =================================================================
+    //  Tabs
+    // =================================================================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'ledger') {
+          const container = document.getElementById('ledger-container');
+          if (container) container.scrollTop = 0;
+        }
+      });
+    });
+
+    // =================================================================
+    //  Upload & Preview
+    // =================================================================
+    const uploadZone = document.getElementById('upload-zone');
+    const screenshotInput = document.getElementById('screenshot-input');
+    const previewContainer = document.getElementById('preview-container');
+    const previewImg = document.getElementById('preview-img');
+    const previewRemove = document.getElementById('preview-remove');
+
+    let currentScreenshotBase64 = null;
+
+    // Drag & drop visual
+    ['dragenter', 'dragover'].forEach(evt => {
+      uploadZone.addEventListener(evt, e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      uploadZone.addEventListener(evt, e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); });
+    });
+    uploadZone.addEventListener('drop', e => {
+      if (e.dataTransfer.files.length) {
+        screenshotInput.files = e.dataTransfer.files;
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    screenshotInput.addEventListener('change', () => {
+      if (screenshotInput.files.length) handleFile(screenshotInput.files[0]);
+    });
+
+    previewRemove.addEventListener('click', () => {
+      clearScreenshot();
+    });
+
+    function clearScreenshot() {
+      currentScreenshotBase64 = null;
+      screenshotInput.value = '';
+      previewContainer.classList.remove('visible');
+      uploadZone.classList.remove('has-file');
+      document.getElementById('ocr-status').classList.remove('visible');
+      document.getElementById('extracted-fields').classList.remove('visible');
+    }
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showToast('Please upload an image file.', 'error');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('File size must be under 5 MB.', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentScreenshotBase64 = e.target.result;
+        previewImg.src = e.target.result;
+        previewContainer.classList.add('visible');
+        uploadZone.classList.add('has-file');
+
+        // Run OCR
+        runOCR(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // =================================================================
+    //  OCR — Tesseract.js
+    // =================================================================
+    async function runOCR(imageDataUrl) {
+      const ocrStatus = document.getElementById('ocr-status');
+      const ocrStatusText = document.getElementById('ocr-status-text');
+      const extractedFields = document.getElementById('extracted-fields');
+
+      // Show loading
+      ocrStatus.className = 'ocr-status visible loading';
+      ocrStatusText.textContent = 'Analyzing screenshot for amount & date...';
+      extractedFields.classList.remove('visible');
+
+      try {
+        const result = await Tesseract.recognize(imageDataUrl, 'eng', {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              const pct = Math.round(m.progress * 100);
+              ocrStatusText.textContent = `Reading screenshot... ${pct}%`;
+            }
+          }
+        });
+
+        const text = result.data.text;
+        console.log('OCR raw text:', text);
+
+        const extracted = extractFromText(text);
+
+        if (extracted.amount || extracted.date) {
+          ocrStatus.className = 'ocr-status visible success';
+          ocrStatusText.textContent = 'Successfully extracted information from screenshot!';
+          extractedFields.classList.add('visible');
+
+          if (extracted.amount) {
+            document.getElementById('contrib-amount').value = extracted.amount;
+            document.getElementById('extracted-amount').textContent = '₹' + Number(extracted.amount).toLocaleString('en-IN');
+          } else {
+            document.getElementById('extracted-amount').textContent = 'Not detected';
+          }
+
+          if (extracted.date) {
+            document.getElementById('contrib-date').value = extracted.dateISO;
+            document.getElementById('extracted-date').textContent = extracted.date;
+          } else {
+            document.getElementById('extracted-date').textContent = 'Not detected';
+          }
+        } else {
+          ocrStatus.className = 'ocr-status visible error';
+          ocrStatusText.textContent = 'Could not auto-detect amount/date. Please enter manually.';
+        }
+
+      } catch (err) {
+        console.error('OCR error:', err);
+        ocrStatus.className = 'ocr-status visible error';
+        ocrStatusText.textContent = 'OCR failed. Please enter amount and date manually.';
+      }
+    }
+
+    // =================================================================
+    //  Intelligent Extraction from OCR Text
+    // =================================================================
+    function extractFromText(text) {
+      let amount = null;
+      let date = null;
+      let dateISO = null;
+
+      // --- Amount extraction ---
+      // UPI screenshots typically show amounts in various formats:
+      // ₹200, ₹2,000.00, Rs. 500, INR 1000, Paid ₹200, Amount: ₹500
+      const amountPatterns = [
+        // ₹ symbol with number (most common in UPI apps)
+        /(?:₹|Rs\.?|INR)\s*([0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?)/gi,
+        // Number followed by ₹ or Rs
+        /([0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?)\s*(?:₹|Rs\.?|INR)/gi,
+        // "Amount" or "Paid" followed by number
+        /(?:amount|paid|debited|sent|credited|received|total)\s*[:=]?\s*(?:₹|Rs\.?|INR)?\s*([0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?)/gi,
+        // Standalone large number (fallback - at least 2 digits)
+        /\b([0-9]{2,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?)\b/g
+      ];
+
+      const amountCandidates = [];
+
+      for (const pattern of amountPatterns) {
+        let match;
+        while ((match = pattern.exec(text)) !== null) {
+          const raw = match[1].replace(/,/g, '');
+          const num = parseFloat(raw);
+          // Filter out unreasonable amounts (< 1 or looks like a year/time)
+          if (num >= 1 && num <= 100000) {
+            amountCandidates.push(num);
+          }
+        }
+      }
+
+      // Pick the most likely amount:
+      // - Prefer values from specific patterns (first found)
+      // - Filter out values that look like dates or times (e.g., 2024, 1230)
+      if (amountCandidates.length > 0) {
+        // Remove duplicates and sort by likelihood (larger = more likely a payment)
+        const unique = [...new Set(amountCandidates)];
+        // The first match from specific patterns is most reliable
+        amount = unique[0].toString();
+      }
+
+      // --- Date extraction ---
+      const monthNames = {
+        'jan': '01', 'january': '01',
+        'feb': '02', 'february': '02',
+        'mar': '03', 'march': '03',
+        'apr': '04', 'april': '04',
+        'may': '05',
+        'jun': '06', 'june': '06',
+        'jul': '07', 'july': '07',
+        'aug': '08', 'august': '08',
+        'sep': '09', 'sept': '09', 'september': '09',
+        'oct': '10', 'october': '10',
+        'nov': '11', 'november': '11',
+        'dec': '12', 'december': '12'
+      };
+
+      const datePatterns = [
+        // DD Mon YYYY or DD Month YYYY (e.g., 05 Oct 2024, 5 October 2024)
+        /(\d{1,2})\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s*,?\s*(\d{4})/gi,
+        // Mon DD, YYYY (e.g., Oct 05, 2024)
+        /(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2}),?\s*(\d{4})/gi,
+        // DD/MM/YYYY or DD-MM-YYYY
+        /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/g,
+        // YYYY-MM-DD (ISO)
+        /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/g,
+        // DD/MM/YY
+        /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})\b/g
+      ];
+
+      // Try pattern 1: DD Mon YYYY
+      let match = datePatterns[0].exec(text);
+      if (match) {
+        const day = match[1].padStart(2, '0');
+        const mon = monthNames[match[2].toLowerCase()] || '01';
+        const year = match[3];
+        date = `${day}/${mon}/${year}`;
+        dateISO = `${year}-${mon}-${day}`;
+      }
+
+      // Try pattern 2: Mon DD, YYYY
+      if (!date) {
+        match = datePatterns[1].exec(text);
+        if (match) {
+          const mon = monthNames[match[1].toLowerCase()] || '01';
+          const day = match[2].padStart(2, '0');
+          const year = match[3];
+          date = `${day}/${mon}/${year}`;
+          dateISO = `${year}-${mon}-${day}`;
+        }
+      }
+
+      // Try pattern 3: DD/MM/YYYY
+      if (!date) {
+        match = datePatterns[2].exec(text);
+        if (match) {
+          const day = match[1].padStart(2, '0');
+          const mon = match[2].padStart(2, '0');
+          const year = match[3];
+          if (parseInt(mon) <= 12 && parseInt(day) <= 31) {
+            date = `${day}/${mon}/${year}`;
+            dateISO = `${year}-${mon}-${day}`;
+          }
+        }
+      }
+
+      // Try pattern 4: YYYY-MM-DD
+      if (!date) {
+        match = datePatterns[3].exec(text);
+        if (match) {
+          const year = match[1];
+          const mon = match[2].padStart(2, '0');
+          const day = match[3].padStart(2, '0');
+          if (parseInt(mon) <= 12 && parseInt(day) <= 31) {
+            date = `${day}/${mon}/${year}`;
+            dateISO = `${year}-${mon}-${day}`;
+          }
+        }
+      }
+
+      // Try pattern 5: DD/MM/YY
+      if (!date) {
+        match = datePatterns[4].exec(text);
+        if (match) {
+          const day = match[1].padStart(2, '0');
+          const mon = match[2].padStart(2, '0');
+          let year = parseInt(match[3]);
+          year = year < 50 ? 2000 + year : 1900 + year;
+          if (parseInt(mon) <= 12 && parseInt(day) <= 31) {
+            date = `${day}/${mon}/${year}`;
+            dateISO = `${year}-${mon}-${day}`;
+          }
+        }
+      }
+
+      return { amount, date, dateISO };
+    }
+
+    // =================================================================
+    //  Form Submission
+    // =================================================================
+    const form = document.getElementById('contribution-form');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('contrib-name').value.trim();
+      const amount = document.getElementById('contrib-amount').value;
+      const dateVal = document.getElementById('contrib-date').value;
+
+      if (!name || !amount || !dateVal) {
+        showToast('Please fill all required fields.', 'error');
+        return;
+      }
+
+      if (!currentScreenshotBase64) {
+        showToast('Please upload a transaction screenshot.', 'error');
+        return;
+      }
+
+      if (APPS_SCRIPT_URL === "APPS_SCRIPT_URL") {
+        showToast('⚠️ Backend not configured. Please set up the Google Apps Script endpoint (see setup guide).', 'error');
+        return;
+      }
+
+      // Format date to DD/MM/YYYY for the sheet
+      const [y, m, d] = dateVal.split('-');
+      const formattedDate = `${d}/${m}/${y}`;
+
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Apps Script requires this
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name,
+            amount: amount,
+            date: formattedDate,
+            screenshot: currentScreenshotBase64
+          })
+        });
+
+        // With no-cors, we can't read the response, so assume success if no network error
+        showToast('✅ Submission sent! Your contribution will appear after admin approval.', 'success');
+        form.reset();
+        clearScreenshot();
+        document.getElementById('contrib-date').value = '';
+
+      } catch (err) {
+        console.error('Submit error:', err);
+        showToast('❌ Failed to submit. Please check your connection and try again.', 'error');
+      } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    });
+
+    function showToast(message, type) {
+      const toast = document.getElementById('form-toast');
+      toast.textContent = message;
+      toast.className = 'form-toast visible ' + type;
+      setTimeout(() => toast.classList.remove('visible'), 6000);
+    }
+
+    // =================================================================
+    //  Ledger — Pagination & Scroll Loading (Latest to Oldest)
+    // =================================================================
+    const ledgerContainer = document.getElementById('ledger-container');
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+    const ledgerRefreshBtn = document.getElementById('ledger-refresh-btn');
+    const ledgerCountBadge = document.getElementById('ledger-count-badge');
+
+    const PAGE_SIZE = 25;
+    let allLedgerRows = [];
+    let renderedCount = 0;
+    let isLoadingMore = false;
+    let ledgerObserver = null;
+
     function formatNumber(value) {
       if (value === "" || value == null) return "—";
-      const num = parseFloat(value);
-      if (isNaN(num)) return "—";
+      const num = parseFloat(value.toString().replace(/,/g, ''));
+      if (isNaN(num)) return value;
       return num.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
     }
 
     function formatDate(dateStr) {
       if (!dateStr) return "—";
-      const parts = dateStr.split('/');
+      const parts = dateStr.toString().trim().split('/');
       if (parts.length === 3) {
         const day = parseInt(parts[0], 10);
         const month = parseInt(parts[1], 10) - 1;
         const year = parseInt(parts[2], 10);
         if (!isNaN(day) && !isNaN(month) && !isNaN(year) && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
-          const date = new Date(year, month, day);
-          if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
+          const d = new Date(year, month, day);
+          if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
             return `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
           }
         }
@@ -389,102 +1955,586 @@
       return dateStr;
     }
 
-    // === Show Ledger Button ===
-    const showLedgerBtn = document.getElementById('show-ledger-btn');
-    const ledgerContainer = document.getElementById('ledger-container');
-    
-    showLedgerBtn.addEventListener('click', () => {
-      ledgerContainer.classList.add('visible');
-      showLedgerBtn.style.display = 'none';
-      
-      setTimeout(() => {
-        const container = document.getElementById("ledger-container");
-        container.scrollTop = container.scrollHeight;
-      }, 100);
-    });
-
-    // === Scroll Management ===
-    const container = document.getElementById("ledger-container");
-    const scrollToBottomBtn = document.getElementById("scrollToBottom");
-
-    container.addEventListener("scroll", () => {
-      if (container.scrollTop > 50) {
-        scrollToBottomBtn.classList.add("show");
+    function updateLedgerCountBadge() {
+      if (!ledgerCountBadge) return;
+      if (allLedgerRows.length === 0) {
+        ledgerCountBadge.textContent = "0 entries";
       } else {
-        scrollToBottomBtn.classList.remove("show");
+        ledgerCountBadge.textContent = `Showing ${renderedCount} of ${allLedgerRows.length} entries`;
       }
-    });
+    }
 
-    scrollToBottomBtn.addEventListener("click", () => {
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: "smooth"
+    function attachObserver(targetElement) {
+      if ('IntersectionObserver' in window) {
+        if (ledgerObserver) ledgerObserver.disconnect();
+        ledgerObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && !isLoadingMore && renderedCount < allLedgerRows.length) {
+              renderNextBatch();
+            }
+          });
+        }, {
+          root: ledgerContainer,
+          rootMargin: '100px'
+        });
+        if (targetElement) {
+          ledgerObserver.observe(targetElement);
+        }
+      }
+    }
+
+    function renderNextBatch() {
+      if (isLoadingMore) return;
+      if (renderedCount >= allLedgerRows.length) return;
+
+      isLoadingMore = true;
+
+      const tbody = document.getElementById("ledger-body");
+      // Remove any existing sentinel row
+      const existingSentinel = document.getElementById('ledger-sentinel-row');
+      if (existingSentinel) existingSentinel.remove();
+
+      const nextBatchEnd = Math.min(renderedCount + PAGE_SIZE, allLedgerRows.length);
+      const rowsToRender = allLedgerRows.slice(renderedCount, nextBatchEnd);
+      const fragment = document.createDocumentFragment();
+
+      rowsToRender.forEach(row => {
+        const tr = document.createElement("tr");
+        const isSummaryRow = (!row["Name"] || row["Name"].toString().trim() === "") && row["Balance"];
+
+        if (isSummaryRow) {
+          tr.classList.add("balance-row");
+          tr.innerHTML = `
+            <td colspan="4" style="text-align: right;"><strong>Balance:</strong></td>
+            <td>${formatNumber(row["Balance"])}</td>
+          `;
+        } else {
+          const debit = row["Debit"] ? row["Debit"].toString().trim() : "";
+          const credit = row["Credit"] ? row["Credit"].toString().trim() : "";
+          tr.innerHTML = `
+            <td>${escapeHtml(row["Name"] || "—")}</td>
+            <td>${escapeHtml(formatDate(row["Date"]))}</td>
+            <td class="${debit ? 'debit' : ''}">${formatNumber(debit)}</td>
+            <td class="${credit ? 'credit' : ''}">${formatNumber(credit)}</td>
+            <td>${formatNumber(row["Balance"])}</td>
+          `;
+        }
+        fragment.appendChild(tr);
       });
-    });
 
-    // === Fetch and Render Data ===
+      tbody.appendChild(fragment);
+      renderedCount = nextBatchEnd;
+      updateLedgerCountBadge();
+
+      // Check if more rows remain to be loaded
+      if (renderedCount < allLedgerRows.length) {
+        const sentinel = document.createElement("tr");
+        sentinel.id = "ledger-sentinel-row";
+        sentinel.innerHTML = `
+          <td colspan="5" style="text-align: center; padding: 14px; color: var(--text-muted); font-size: 0.85em;">
+            <span class="btn-loader" style="width: 14px; height: 14px; border-width: 2px; border-color: var(--text-muted); border-top-color: transparent; display: inline-block; vertical-align: middle; margin-right: 6px;"></span>
+            Loading older entries... (${renderedCount} of ${allLedgerRows.length})
+          </td>
+        `;
+        tbody.appendChild(sentinel);
+        attachObserver(sentinel);
+      } else {
+        const endRow = document.createElement("tr");
+        endRow.id = "ledger-sentinel-row";
+        endRow.innerHTML = `
+          <td colspan="5" style="text-align: center; padding: 16px; color: var(--text-muted); font-size: 0.84em; font-style: italic;">
+            ✓ Earliest entry reached (All ${allLedgerRows.length} entries loaded)
+          </td>
+        `;
+        tbody.appendChild(endRow);
+      }
+
+      isLoadingMore = false;
+    }
+
+    // Scroll listeners for container
+    if (ledgerContainer) {
+      ledgerContainer.addEventListener('scroll', () => {
+        // Show/hide floating "↑ Top" button
+        if (scrollToTopBtn) {
+          scrollToTopBtn.style.display = ledgerContainer.scrollTop > 120 ? 'block' : 'none';
+        }
+
+        // Backup scroll detection for loading more rows
+        if (ledgerContainer.scrollTop + ledgerContainer.clientHeight >= ledgerContainer.scrollHeight - 80) {
+          if (!isLoadingMore && renderedCount < allLedgerRows.length) {
+            renderNextBatch();
+          }
+        }
+      });
+    }
+
+    if (scrollToTopBtn) {
+      scrollToTopBtn.addEventListener('click', () => {
+        if (ledgerContainer) {
+          ledgerContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+    }
+
+    // =================================================================
+    //  Ledger — Fetch CSV Data
+    // =================================================================
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSIvmo5aD2rAjv245M91KCPIlVw9u5qH3K112QnJE7iVokxUEK6NiSj1TpzHWfWd_NybBljUHqf2MBA/pub?gid=0&single=true&output=csv";
 
-    Papa.parse(CSV_URL, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: function(results) {
-        const balanceValue = document.getElementById("balance-value");
-        const tbody = document.getElementById("ledger-body");
-        
-        if (results.data.length === 0) {
-          balanceValue.textContent = "₹0.00";
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">No data available</td></tr>`;
+    function fetchLedgerData() {
+      const balanceValue = document.getElementById("balance-value");
+      const tbody = document.getElementById("ledger-body");
+
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px;">Loading ledger...</td></tr>`;
+      if (ledgerCountBadge) ledgerCountBadge.textContent = "Loading entries...";
+
+      Papa.parse(CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          if (!results.data || results.data.length === 0) {
+            balanceValue.textContent = "₹0.00";
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px;">No entries available</td></tr>`;
+            if (ledgerCountBadge) ledgerCountBadge.textContent = "0 entries";
+            return;
+          }
+
+          // Calculate current balance from the latest entry in chronological sheet order
+          let currentBalance = "0.00";
+          for (let i = results.data.length - 1; i >= 0; i--) {
+            const row = results.data[i];
+            if (row["Balance"] && row["Balance"].toString().trim() !== "") {
+              currentBalance = row["Balance"];
+              break;
+            }
+          }
+          balanceValue.textContent = "₹" + formatNumber(currentBalance);
+
+          // Filter out completely blank rows
+          const validRows = results.data.filter(row => {
+            return (
+              (row["Name"] && row["Name"].toString().trim() !== "") ||
+              (row["Date"] && row["Date"].toString().trim() !== "") ||
+              (row["Debit"] && row["Debit"].toString().trim() !== "") ||
+              (row["Credit"] && row["Credit"].toString().trim() !== "") ||
+              (row["Balance"] && row["Balance"].toString().trim() !== "")
+            );
+          });
+
+          // Order from LATEST to OLDER entries (reverse chronological)
+          allLedgerRows = [...validRows].reverse();
+          renderedCount = 0;
+          tbody.innerHTML = "";
+
+          // Render first batch of 25 entries
+          renderNextBatch();
+
+          const lastUpdatedEl = document.querySelector(".last-updated");
+          if (lastUpdatedEl) {
+            lastUpdatedEl.textContent = "Last updated: " + new Date().toLocaleString('en-IN');
+          }
+        },
+        error: function (error) {
+          balanceValue.textContent = "Error";
+          const isFileProtocol = window.location.protocol === 'file:';
+          const msg = isFileProtocol
+            ? "⚠️ <strong>CORS Error:</strong> Browsers block Google Sheets data when opened via <code>file:///</code>.<br>Run via a local web server (e.g. <code>python -m http.server</code>) or view on GitHub Pages."
+            : "Failed to load ledger. Please check your network connection.";
+          tbody.innerHTML =
+            `<tr><td colspan="5" style="text-align: center; color: var(--debit); padding: 20px; line-height: 1.6;">${msg}</td></tr>`;
+          if (ledgerCountBadge) ledgerCountBadge.textContent = "Error loading";
+          console.error("CSV Load Error:", error);
+        }
+      });
+    }
+
+    if (ledgerRefreshBtn) {
+      ledgerRefreshBtn.addEventListener('click', () => {
+        fetchLedgerData();
+      });
+    }
+
+    // Trigger initial fetch
+    fetchLedgerData();
+
+    // Set today's date as default
+    document.getElementById('contrib-date').valueAsDate = new Date();
+
+    // =================================================================
+    //  Admin Panel
+    // =================================================================
+    let adminPin = null;
+
+    const adminGate = document.getElementById('admin-gate');
+    const adminPanel = document.getElementById('admin-panel');
+    const adminPinInput = document.getElementById('admin-pin');
+    const adminUnlockBtn = document.getElementById('admin-unlock-btn');
+    const adminError = document.getElementById('admin-error');
+    const adminContent = document.getElementById('admin-content');
+    const adminRefreshBtn = document.getElementById('admin-refresh-btn');
+    const adminLogoutBtn = document.getElementById('admin-logout-btn');
+    const pendingCountBadge = document.getElementById('pending-count');
+
+    // Screenshot modal
+    const screenshotModal = document.getElementById('screenshot-modal');
+    const screenshotModalImg = document.getElementById('screenshot-modal-img');
+    const screenshotModalClose = document.getElementById('screenshot-modal-close');
+
+    screenshotModalClose.addEventListener('click', () => {
+      screenshotModal.classList.remove('visible');
+    });
+    screenshotModal.addEventListener('click', (e) => {
+      if (e.target === screenshotModal) screenshotModal.classList.remove('visible');
+    });
+
+    function openScreenshot(url) {
+      // Convert Google Drive URLs to direct image links
+      let imgUrl = url;
+      const driveMatch = url.match(/\/file\/d\/([^/]+)/);
+      if (driveMatch) {
+        imgUrl = `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+      }
+      screenshotModalImg.src = imgUrl;
+      screenshotModal.classList.add('visible');
+    }
+
+    // Unlock
+    adminUnlockBtn.addEventListener('click', () => attemptUnlock());
+    adminPinInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') attemptUnlock();
+    });
+
+    async function attemptUnlock() {
+      const pin = adminPinInput.value.trim();
+      if (!pin) {
+        adminError.textContent = 'Please enter a PIN.';
+        return;
+      }
+
+      if (APPS_SCRIPT_URL === "APPS_SCRIPT_URL") {
+        adminError.textContent = '⚠️ Backend not configured. Set up Apps Script first.';
+        return;
+      }
+
+      adminError.textContent = '';
+      adminUnlockBtn.textContent = '...';
+      adminUnlockBtn.disabled = true;
+
+      try {
+        const url = `${APPS_SCRIPT_URL}?action=getPending&pin=${encodeURIComponent(pin)}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        if (data.status === 'error') {
+          adminError.textContent = data.message || 'Invalid PIN.';
           return;
         }
 
-        let currentBalance = "0.00";
-        for (let i = results.data.length - 1; i >= 0; i--) {
-          const row = results.data[i];
-          if (row["Balance"] && row["Balance"].toString().trim() !== "") {
-            currentBalance = row["Balance"];
-            break;
-          }
-        }
-        
-        balanceValue.textContent = "₹" + formatNumber(currentBalance);
+        // Success — store PIN and show panel
+        adminPin = pin;
+        adminGate.style.display = 'none';
+        adminPanel.classList.add('visible');
+        renderSubmissions(data.submissions || []);
 
-        tbody.innerHTML = "";
-        results.data.forEach(row => {
-          const tr = document.createElement("tr");
-          const isSummaryRow = (!row["Name"] || row["Name"].toString().trim() === "") && row["Balance"];
-
-          if (isSummaryRow) {
-            tr.classList.add("balance-row");
-            tr.innerHTML = `
-              <td colspan="4" style="text-align: right;"><strong>Current Balance:</strong></td>
-              <td>${formatNumber(row["Balance"])}</td>
-            `;
-          } else {
-            const debit = row["Debit"];
-            const credit = row["Credit"];
-            tr.innerHTML = `
-              <td>${row["Name"] || "—"}</td>
-              <td>${formatDate(row["Date"])}</td>
-              <td class="${debit ? 'debit' : ''}">${formatNumber(debit)}</td>
-              <td class="${credit ? 'credit' : ''}">${formatNumber(credit)}</td>
-              <td>${formatNumber(row["Balance"])}</td>
-            `;
-          }
-          tbody.appendChild(tr);
-        });
-
-        document.querySelector(".last-updated").textContent = 
-          "Last updated: " + new Date().toLocaleString('en-IN');
-      },
-      error: function(error) {
-        document.getElementById("balance-value").textContent = "Error";
-        document.getElementById("ledger-body").innerHTML = 
-          `<tr><td colspan="5" style="text-align: center; color: var(--debit);">Failed to load ledger</td></tr>`;
-        console.error("CSV Load Error:", error);
+      } catch (err) {
+        console.error('Admin unlock error:', err);
+        adminError.textContent = 'Connection failed. Check your network.';
+      } finally {
+        adminUnlockBtn.textContent = 'Unlock';
+        adminUnlockBtn.disabled = false;
       }
+    }
+
+    // Logout
+    adminLogoutBtn.addEventListener('click', () => {
+      adminPin = null;
+      adminPanel.classList.remove('visible');
+      adminGate.style.display = 'block';
+      adminPinInput.value = '';
+      adminError.textContent = '';
     });
+
+    // Refresh
+    adminRefreshBtn.addEventListener('click', () => fetchPending());
+
+    async function fetchPending() {
+      adminContent.innerHTML = `
+        <div class="admin-loading">
+          <div class="ocr-spinner"></div>
+          Loading submissions...
+        </div>`;
+
+      try {
+        const url = `${APPS_SCRIPT_URL}?action=getPending&pin=${encodeURIComponent(adminPin)}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        if (data.status === 'error') {
+          adminContent.innerHTML = `<div class="empty-state"><p style="color:var(--debit);">❌ ${data.message}</p></div>`;
+          return;
+        }
+
+        renderSubmissions(data.submissions || []);
+      } catch (err) {
+        console.error('Fetch pending error:', err);
+        adminContent.innerHTML = `<div class="empty-state"><p style="color:var(--debit);">❌ Failed to load. Check connection.</p></div>`;
+      }
+    }
+
+    function renderSubmissions(submissions) {
+      if (submissions.length === 0) {
+        pendingCountBadge.style.display = 'none';
+        adminContent.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">✅</span>
+            <p>No pending submissions.<br>All caught up!</p>
+          </div>`;
+        return;
+      }
+
+      pendingCountBadge.style.display = 'inline-flex';
+      pendingCountBadge.textContent = submissions.length;
+
+      const html = submissions.map(sub => {
+        const screenshotLink = sub.screenshot
+          ? `<div class="card-screenshot">
+               <a href="#" onclick="openScreenshot('${sub.screenshot.replace(/'/g, "\\'")}')\ ; return false;">📎 View Screenshot</a>
+             </div>`
+          : '';
+
+        return `
+          <div class="submission-card" id="card-${sub.row}">
+            <div class="card-top">
+              <div class="card-info">
+                <h3 id="card-name-title-${sub.row}">${escapeHtml(sub.name)}</h3>
+                <div class="card-meta">
+                  Submitted: ${escapeHtml(sub.timestamp)}
+                  <span class="card-badge-saved" id="edit-badge-${sub.row}">✓ Saved</span>
+                </div>
+              </div>
+              <div class="card-amount" id="card-amount-disp-${sub.row}">₹${Number(sub.amount).toLocaleString('en-IN')}</div>
+            </div>
+
+            <!-- Read-only Details -->
+            <div class="card-details" id="view-details-${sub.row}">
+              <div class="card-detail-item">
+                <span class="detail-label">Transaction Date</span>
+                <span class="detail-value" id="card-date-disp-${sub.row}">${escapeHtml(sub.date)}</span>
+              </div>
+              ${screenshotLink}
+            </div>
+
+            <!-- Inline Edit Panel -->
+            <div class="card-edit-panel" id="edit-panel-${sub.row}">
+              <div class="card-edit-title">
+                <span>✏️ Edit Auto-Detected Entry</span>
+                ${sub.screenshot ? `<a href="#" onclick="openScreenshot('${sub.screenshot.replace(/'/g, "\\'")}') ; return false;" style="font-size:0.9em; text-transform:none; color:var(--header-border); font-weight:600;">📎 Compare Screenshot</a>` : ''}
+              </div>
+              <div class="card-edit-row">
+                <div class="card-edit-field full-width">
+                  <label for="edit-name-${sub.row}">Submitter Name</label>
+                  <input type="text" id="edit-name-${sub.row}" class="card-inline-input" value="${escapeHtml(sub.name)}" />
+                </div>
+                <div class="card-edit-field">
+                  <label for="edit-amount-${sub.row}">Amount (₹)</label>
+                  <input type="number" id="edit-amount-${sub.row}" class="card-inline-input" value="${escapeHtml(sub.amount)}" min="1" step="any" />
+                </div>
+                <div class="card-edit-field">
+                  <label for="edit-date-${sub.row}">Date (DD/MM/YYYY)</label>
+                  <input type="text" id="edit-date-${sub.row}" class="card-inline-input" value="${escapeHtml(sub.date)}" placeholder="DD/MM/YYYY" />
+                </div>
+              </div>
+              <div class="card-edit-actions">
+                <button type="button" class="card-action-btn approve" onclick="handleApproveWithEdits(${sub.row})">✅ Save & Approve</button>
+                <button type="button" class="card-action-btn save-only" onclick="handleSaveOnly(${sub.row})">💾 Save</button>
+                <button type="button" class="card-action-btn cancel" onclick="toggleEdit(${sub.row})">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Standard Actions -->
+            <div class="card-actions" id="actions-${sub.row}">
+              <button class="card-action-btn approve" onclick="handleApprove(${sub.row})">✅ Approve</button>
+              <button class="card-action-btn edit" id="edit-btn-${sub.row}" onclick="toggleEdit(${sub.row})">✏️ Edit</button>
+              <button class="card-action-btn reject" onclick="handleReject(${sub.row})">❌ Reject</button>
+            </div>
+          </div>`;
+      }).join('');
+
+      adminContent.innerHTML = `<div class="submissions-grid">${html}</div>`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '—';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function toggleEdit(row) {
+      const editPanel = document.getElementById(`edit-panel-${row}`);
+      const viewDetails = document.getElementById(`view-details-${row}`);
+      const normalActions = document.getElementById(`actions-${row}`);
+      const editBtn = document.getElementById(`edit-btn-${row}`);
+
+      if (!editPanel) return;
+
+      const isEditing = editPanel.style.display === 'block';
+      if (isEditing) {
+        editPanel.style.display = 'none';
+        if (viewDetails) viewDetails.style.display = 'flex';
+        if (normalActions) normalActions.style.display = 'flex';
+        if (editBtn) editBtn.classList.remove('active');
+      } else {
+        editPanel.style.display = 'block';
+        if (viewDetails) viewDetails.style.display = 'none';
+        if (normalActions) normalActions.style.display = 'none';
+        if (editBtn) editBtn.classList.add('active');
+      }
+    }
+
+    function handleApproveWithEdits(row) {
+      const nameInput = document.getElementById(`edit-name-${row}`);
+      const amountInput = document.getElementById(`edit-amount-${row}`);
+      const dateInput = document.getElementById(`edit-date-${row}`);
+
+      const name = nameInput ? nameInput.value.trim() : '';
+      const amount = amountInput ? amountInput.value.trim() : '';
+      const date = dateInput ? dateInput.value.trim() : '';
+
+      if (!name || !amount || !date) {
+        alert('Please fill in Name, Amount, and Date.');
+        return;
+      }
+
+      handleApprove(row, { name, amount, date });
+    }
+
+    async function handleSaveOnly(row) {
+      const nameInput = document.getElementById(`edit-name-${row}`);
+      const amountInput = document.getElementById(`edit-amount-${row}`);
+      const dateInput = document.getElementById(`edit-date-${row}`);
+
+      const name = nameInput ? nameInput.value.trim() : '';
+      const amount = amountInput ? amountInput.value.trim() : '';
+      const date = dateInput ? dateInput.value.trim() : '';
+
+      if (!name || !amount || !date) {
+        alert('Please fill in Name, Amount, and Date.');
+        return;
+      }
+
+      const card = document.getElementById(`card-${row}`);
+      card.classList.add('processing');
+
+      try {
+        let url = `${APPS_SCRIPT_URL}?action=update&row=${row}&pin=${encodeURIComponent(adminPin)}` +
+          `&name=${encodeURIComponent(name)}&amount=${encodeURIComponent(amount)}&date=${encodeURIComponent(date)}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        card.classList.remove('processing');
+
+        if (data.status === 'ok') {
+          // Update card display
+          const nameEl = document.getElementById(`card-name-title-${row}`);
+          const amountEl = document.getElementById(`card-amount-disp-${row}`);
+          const dateEl = document.getElementById(`card-date-disp-${row}`);
+          if (nameEl) nameEl.textContent = name;
+          if (amountEl) amountEl.textContent = '₹' + Number(amount).toLocaleString('en-IN');
+          if (dateEl) dateEl.textContent = date;
+
+          toggleEdit(row);
+
+          const badge = document.getElementById(`edit-badge-${row}`);
+          if (badge) {
+            badge.style.display = 'inline-block';
+            setTimeout(() => { badge.style.display = 'none'; }, 3500);
+          }
+        } else {
+          alert('Failed to save: ' + (data.message || 'Unknown error'));
+        }
+      } catch (err) {
+        card.classList.remove('processing');
+        console.error('Save error:', err);
+        alert('Network error while saving changes.');
+      }
+    }
+
+    async function handleApprove(row, edits = null) {
+      const card = document.getElementById(`card-${row}`);
+      const actions = document.getElementById(`actions-${row}`);
+      const editPanel = document.getElementById(`edit-panel-${row}`);
+      card.classList.add('processing');
+
+      try {
+        let url = `${APPS_SCRIPT_URL}?action=approve&row=${row}&pin=${encodeURIComponent(adminPin)}`;
+        if (edits) {
+          if (edits.name) url += `&name=${encodeURIComponent(edits.name)}`;
+          if (edits.amount) url += `&amount=${encodeURIComponent(edits.amount)}`;
+          if (edits.date) url += `&date=${encodeURIComponent(edits.date)}`;
+        }
+
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        card.classList.remove('processing');
+
+        if (data.status === 'ok') {
+          card.classList.add('approved');
+          if (editPanel) editPanel.style.display = 'none';
+          const msg = edits ? '✅ Approved with edited details & added to ledger' : '✅ Approved & added to ledger';
+          actions.style.display = 'block';
+          actions.innerHTML = `<div class="card-result approved-msg">${msg}</div>`;
+          updatePendingCount(-1);
+        } else {
+          actions.style.display = 'block';
+          actions.innerHTML = `<div class="card-result rejected-msg">❌ ${data.message || 'Failed'}</div>`;
+        }
+      } catch (err) {
+        card.classList.remove('processing');
+        console.error('Approve error:', err);
+        actions.style.display = 'block';
+        actions.innerHTML = `<div class="card-result rejected-msg">❌ Network error</div>`;
+      }
+    }
+
+    async function handleReject(row) {
+      if (!confirm('Reject this submission?')) return;
+
+      const card = document.getElementById(`card-${row}`);
+      const actions = document.getElementById(`actions-${row}`);
+      card.classList.add('processing');
+
+      try {
+        const url = `${APPS_SCRIPT_URL}?action=reject&row=${row}&pin=${encodeURIComponent(adminPin)}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        card.classList.remove('processing');
+
+        if (data.status === 'ok') {
+          card.classList.add('rejected');
+          actions.innerHTML = `<div class="card-result rejected-msg">🚫 Rejected</div>`;
+          updatePendingCount(-1);
+        } else {
+          actions.innerHTML = `<div class="card-result rejected-msg">❌ ${data.message || 'Failed'}</div>`;
+        }
+      } catch (err) {
+        card.classList.remove('processing');
+        console.error('Reject error:', err);
+        actions.innerHTML = `<div class="card-result rejected-msg">❌ Network error</div>`;
+      }
+    }
+
+    function updatePendingCount(delta) {
+      const current = parseInt(pendingCountBadge.textContent) || 0;
+      const updated = Math.max(0, current + delta);
+      pendingCountBadge.textContent = updated;
+      if (updated === 0) pendingCountBadge.style.display = 'none';
+    }
   </script>
 </body>
+
 </html>
