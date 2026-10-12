@@ -298,6 +298,14 @@
       color: var(--header-border);
     }
 
+    .form-group label .field-hint {
+      font-size: 0.82em;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-left: 6px;
+      text-transform: none;
+    }
+
     .form-input {
       width: 100%;
       padding: 11px 14px;
@@ -1469,7 +1477,7 @@
 
         <!-- Payment Method Options -->
         <div class="form-group">
-          <label>Contribution Method <span class="required">*</span></label>
+          <label>Contribution Method</label>
           <div class="payment-type-selector">
             <button type="button" class="payment-type-btn active" data-method="upi" id="method-upi-btn">
               <span class="type-icon">📱</span>
@@ -1522,17 +1530,24 @@
           </div>
         </div>
 
-        <!-- Amount (auto-filled or manual) -->
-        <div class="form-group">
-          <label for="contrib-amount">Amount (₹) <span class="required">*</span></label>
-          <input type="number" id="contrib-amount" class="form-input" placeholder="e.g. 500" min="1" step="any"
-            required />
+        <!-- Amount (manual for Cash, auto-detected for UPI) -->
+        <div class="form-group" id="amount-group">
+          <label for="contrib-amount">
+            Amount (₹)
+            <span class="required" id="amount-required-star" style="display:none;">*</span>
+            <span class="field-hint" id="amount-hint">(Auto-detected from screenshot)</span>
+          </label>
+          <input type="number" id="contrib-amount" class="form-input" placeholder="e.g. 500" min="1" step="any" />
         </div>
 
-        <!-- Date (auto-filled or manual) -->
-        <div class="form-group">
-          <label for="contrib-date">Contribution Date <span class="required">*</span></label>
-          <input type="date" id="contrib-date" class="form-input" required />
+        <!-- Date (manual for Cash, auto-detected for UPI) -->
+        <div class="form-group" id="date-group">
+          <label for="contrib-date">
+            Contribution Date
+            <span class="required" id="date-required-star" style="display:none;">*</span>
+            <span class="field-hint" id="date-hint">(Auto-detected from screenshot)</span>
+          </label>
+          <input type="date" id="contrib-date" class="form-input" />
         </div>
 
         <!-- Submit -->
@@ -1672,6 +1687,12 @@
     const methodCashBtn = document.getElementById('method-cash-btn');
     const screenshotUploadGroup = document.getElementById('screenshot-upload-group');
     const formSubtitle = document.getElementById('form-subtitle');
+    const amountRequiredStar = document.getElementById('amount-required-star');
+    const dateRequiredStar = document.getElementById('date-required-star');
+    const amountHint = document.getElementById('amount-hint');
+    const dateHint = document.getElementById('date-hint');
+    const amountInput = document.getElementById('contrib-amount');
+    const dateInput = document.getElementById('contrib-date');
 
     function setPaymentMethod(method) {
       currentPaymentMethod = method;
@@ -1680,12 +1701,24 @@
         methodUpiBtn.classList.remove('active');
         if (screenshotUploadGroup) screenshotUploadGroup.style.display = 'none';
         if (formSubtitle) formSubtitle.textContent = 'Enter your cash contribution details. Amount and date of contribution are mandatory.';
+        if (amountRequiredStar) amountRequiredStar.style.display = 'inline';
+        if (dateRequiredStar) dateRequiredStar.style.display = 'inline';
+        if (amountHint) amountHint.style.display = 'none';
+        if (dateHint) dateHint.style.display = 'none';
+        if (amountInput) amountInput.required = true;
+        if (dateInput) dateInput.required = true;
         clearScreenshot();
       } else {
         methodUpiBtn.classList.add('active');
         methodCashBtn.classList.remove('active');
         if (screenshotUploadGroup) screenshotUploadGroup.style.display = 'block';
-        if (formSubtitle) formSubtitle.textContent = 'Upload your UPI payment screenshot and the amount & date will be auto-detected.';
+        if (formSubtitle) formSubtitle.textContent = 'Upload your UPI payment screenshot and the amount & date will be auto-detected. Your entry will appear in the ledger after admin approval.';
+        if (amountRequiredStar) amountRequiredStar.style.display = 'none';
+        if (dateRequiredStar) dateRequiredStar.style.display = 'none';
+        if (amountHint) amountHint.style.display = 'inline';
+        if (dateHint) dateHint.style.display = 'inline';
+        if (amountInput) amountInput.required = false;
+        if (dateInput) dateInput.required = false;
       }
     }
 
@@ -1973,14 +2006,25 @@
       const amount = document.getElementById('contrib-amount').value;
       const dateVal = document.getElementById('contrib-date').value;
 
-      if (!name || !amount || !dateVal) {
-        showToast('Please fill all required fields.', 'error');
+      if (!name) {
+        showToast('Please enter your name.', 'error');
         return;
       }
 
-      if (currentPaymentMethod === 'upi' && !currentScreenshotBase64) {
-        showToast('Please upload your UPI transaction screenshot.', 'error');
-        return;
+      if (currentPaymentMethod === 'cash') {
+        if (!amount || !dateVal) {
+          showToast('Amount and date are mandatory for cash contributions.', 'error');
+          return;
+        }
+      } else {
+        if (!currentScreenshotBase64) {
+          showToast('Please upload your UPI transaction screenshot.', 'error');
+          return;
+        }
+        if (!amount) {
+          showToast('Please enter the amount or wait for auto-detection to complete.', 'error');
+          return;
+        }
       }
 
       if (APPS_SCRIPT_URL === "APPS_SCRIPT_URL") {
@@ -1989,7 +2033,8 @@
       }
 
       // Format date to DD/MM/YYYY for the sheet
-      const [y, m, d] = dateVal.split('-');
+      const selectedDate = dateVal || new Date().toISOString().split('T')[0];
+      const [y, m, d] = selectedDate.split('-');
       const formattedDate = `${d}/${m}/${y}`;
 
       submitBtn.classList.add('loading');
@@ -2279,6 +2324,7 @@
 
     // Set today's date as default
     document.getElementById('contrib-date').valueAsDate = new Date();
+    setPaymentMethod('upi');
 
     // =================================================================
     //  Admin Panel

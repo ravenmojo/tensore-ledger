@@ -18,8 +18,8 @@ The **TENSORE Lab Cleaning Fund** web application tracks member contributions (c
 ## ✨ Key Features
 
 ### 1. 💰 Contribution Submission (UPI & Cash)
-- **📱 UPI Payments**: Upload a payment screenshot and client-side OCR automatically extracts the **amount** and **transaction date**.
-- **💵 Cash Contributions**: Direct entry mode for in-person cash contributions (amount and date mandatory, no screenshot required).
+- **📱 UPI Payments**: Upload a payment screenshot (mandatory `*`) along with your name (`*`). Amount and transaction date are automatically recognized via client-side OCR and do not require manual entry (no mandatory `*`).
+- **💵 Cash Contributions**: Direct entry mode for cash contributions where Name (`*`), Amount (`*`), and Date (`*`) are strictly mandatory (screenshot upload omitted).
 - **Client-Side Privacy**: OCR runs entirely in the contributor's browser using [Tesseract.js](https://tesseract.projectnaptha.com/) — fast and private.
 
 ### 2. 🔒 On-Page Admin Panel & Inline Editing
