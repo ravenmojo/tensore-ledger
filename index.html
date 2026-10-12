@@ -320,6 +320,72 @@
       color: var(--text-muted);
     }
 
+    /* Payment Method Selector */
+    .payment-type-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .payment-type-btn {
+      padding: 12px 14px;
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.92em;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.25s ease;
+      text-align: center;
+    }
+
+    .payment-type-btn .type-icon {
+      font-size: 1.3em;
+    }
+
+    .payment-type-btn .type-desc {
+      font-size: 0.74em;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .payment-type-btn:hover {
+      border-color: var(--header-border);
+      background: var(--bg-primary);
+      transform: translateY(-1px);
+    }
+
+    .payment-type-btn.active {
+      border-color: var(--header-border);
+      background: var(--bg-primary);
+      color: var(--header-border);
+      box-shadow: 0 3px 12px var(--accent-glow);
+    }
+
+    .payment-type-btn.active .type-desc {
+      color: var(--text-secondary);
+    }
+
+    .cash-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      background: rgba(45, 122, 79, 0.1);
+      color: var(--credit);
+      border: 1px solid rgba(45, 122, 79, 0.2);
+      border-radius: var(--radius-sm);
+      font-size: 0.84em;
+      font-weight: 700;
+    }
+
     /* Upload Zone */
     .upload-zone {
       border: 2px dashed var(--border-subtle);
@@ -1391,7 +1457,7 @@
   <div class="tab-content active" id="tab-contribute">
     <div class="form-card">
       <h2>Submit Contribution</h2>
-      <p class="form-subtitle">Upload your UPI payment screenshot and the amount & date will be auto-detected. Your
+      <p class="form-subtitle" id="form-subtitle">Upload your UPI payment screenshot and the amount & date will be auto-detected. Your
         entry will appear in the ledger after admin approval.</p>
 
       <form id="contribution-form" autocomplete="off">
@@ -1401,8 +1467,25 @@
           <input type="text" id="contrib-name" class="form-input" placeholder="e.g. Rahul Sharma" required />
         </div>
 
-        <!-- Screenshot Upload -->
+        <!-- Payment Method Options -->
         <div class="form-group">
+          <label>Contribution Method <span class="required">*</span></label>
+          <div class="payment-type-selector">
+            <button type="button" class="payment-type-btn active" data-method="upi" id="method-upi-btn">
+              <span class="type-icon">📱</span>
+              <span>UPI Payment</span>
+              <span class="type-desc">Auto-detect from screenshot</span>
+            </button>
+            <button type="button" class="payment-type-btn" data-method="cash" id="method-cash-btn">
+              <span class="type-icon">💵</span>
+              <span>Cash</span>
+              <span class="type-desc">Manual amount & date</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Screenshot Upload (UPI only) -->
+        <div class="form-group" id="screenshot-upload-group">
           <label>UPI Transaction Screenshot <span class="required">*</span></label>
           <div class="upload-zone" id="upload-zone">
             <input type="file" id="screenshot-input" accept="image/*" />
@@ -1442,13 +1525,13 @@
         <!-- Amount (auto-filled or manual) -->
         <div class="form-group">
           <label for="contrib-amount">Amount (₹) <span class="required">*</span></label>
-          <input type="number" id="contrib-amount" class="form-input" placeholder="e.g. 200" min="1" step="1"
+          <input type="number" id="contrib-amount" class="form-input" placeholder="e.g. 500" min="1" step="any"
             required />
         </div>
 
         <!-- Date (auto-filled or manual) -->
         <div class="form-group">
-          <label for="contrib-date">Transaction Date <span class="required">*</span></label>
+          <label for="contrib-date">Contribution Date <span class="required">*</span></label>
           <input type="date" id="contrib-date" class="form-input" required />
         </div>
 
@@ -1580,6 +1663,36 @@
         }
       });
     });
+
+    // =================================================================
+    //  Payment Method Toggle (UPI vs Cash)
+    // =================================================================
+    let currentPaymentMethod = 'upi';
+    const methodUpiBtn = document.getElementById('method-upi-btn');
+    const methodCashBtn = document.getElementById('method-cash-btn');
+    const screenshotUploadGroup = document.getElementById('screenshot-upload-group');
+    const formSubtitle = document.getElementById('form-subtitle');
+
+    function setPaymentMethod(method) {
+      currentPaymentMethod = method;
+      if (method === 'cash') {
+        methodCashBtn.classList.add('active');
+        methodUpiBtn.classList.remove('active');
+        if (screenshotUploadGroup) screenshotUploadGroup.style.display = 'none';
+        if (formSubtitle) formSubtitle.textContent = 'Enter your cash contribution details. Amount and date of contribution are mandatory.';
+        clearScreenshot();
+      } else {
+        methodUpiBtn.classList.add('active');
+        methodCashBtn.classList.remove('active');
+        if (screenshotUploadGroup) screenshotUploadGroup.style.display = 'block';
+        if (formSubtitle) formSubtitle.textContent = 'Upload your UPI payment screenshot and the amount & date will be auto-detected.';
+      }
+    }
+
+    if (methodUpiBtn && methodCashBtn) {
+      methodUpiBtn.addEventListener('click', () => setPaymentMethod('upi'));
+      methodCashBtn.addEventListener('click', () => setPaymentMethod('cash'));
+    }
 
     // =================================================================
     //  Upload & Preview
@@ -1865,8 +1978,8 @@
         return;
       }
 
-      if (!currentScreenshotBase64) {
-        showToast('Please upload a transaction screenshot.', 'error');
+      if (currentPaymentMethod === 'upi' && !currentScreenshotBase64) {
+        showToast('Please upload your UPI transaction screenshot.', 'error');
         return;
       }
 
@@ -1891,15 +2004,20 @@
             name: name,
             amount: amount,
             date: formattedDate,
-            screenshot: currentScreenshotBase64
+            method: currentPaymentMethod === 'cash' ? 'Cash' : 'UPI',
+            screenshot: currentPaymentMethod === 'upi' ? currentScreenshotBase64 : 'Cash'
           })
         });
 
         // With no-cors, we can't read the response, so assume success if no network error
-        showToast('✅ Submission sent! Your contribution will appear after admin approval.', 'success');
+        const successMsg = currentPaymentMethod === 'cash'
+          ? '✅ Cash contribution submitted! It will appear in the ledger after admin approval.'
+          : '✅ UPI submission sent! Your contribution will appear after admin approval.';
+        showToast(successMsg, 'success');
         form.reset();
         clearScreenshot();
-        document.getElementById('contrib-date').value = '';
+        document.getElementById('contrib-date').valueAsDate = new Date();
+        setPaymentMethod('upi');
 
       } catch (err) {
         console.error('Submit error:', err);
@@ -2298,11 +2416,12 @@
       pendingCountBadge.textContent = submissions.length;
 
       const html = submissions.map(sub => {
-        const screenshotLink = sub.screenshot
-          ? `<div class="card-screenshot">
-               <a href="#" onclick="openScreenshot('${sub.screenshot.replace(/'/g, "\\'")}')\ ; return false;">📎 View Screenshot</a>
-             </div>`
-          : '';
+        const isCash = !sub.screenshot || sub.screenshot.toLowerCase() === 'cash' || sub.screenshot === '—';
+        const screenshotLink = isCash
+          ? `<div class="card-screenshot"><span class="cash-badge">💵 Cash Contribution</span></div>`
+          : `<div class="card-screenshot">
+               <a href="#" onclick="openScreenshot('${sub.screenshot.replace(/'/g, "\\'")}') ; return false;">📎 View Screenshot</a>
+             </div>`;
 
         return `
           <div class="submission-card" id="card-${sub.row}">
@@ -2329,8 +2448,8 @@
             <!-- Inline Edit Panel -->
             <div class="card-edit-panel" id="edit-panel-${sub.row}">
               <div class="card-edit-title">
-                <span>✏️ Edit Auto-Detected Entry</span>
-                ${sub.screenshot ? `<a href="#" onclick="openScreenshot('${sub.screenshot.replace(/'/g, "\\'")}') ; return false;" style="font-size:0.9em; text-transform:none; color:var(--header-border); font-weight:600;">📎 Compare Screenshot</a>` : ''}
+                <span>✏️ Edit ${isCash ? 'Cash' : 'Auto-Detected'} Entry</span>
+                ${!isCash && sub.screenshot ? `<a href="#" onclick="openScreenshot('${sub.screenshot.replace(/'/g, "\\'")}') ; return false;" style="font-size:0.9em; text-transform:none; color:var(--header-border); font-weight:600;">📎 Compare Screenshot</a>` : `<span class="cash-badge" style="font-size:0.75em; padding:2px 8px;">💵 Cash</span>`}
               </div>
               <div class="card-edit-row">
                 <div class="card-edit-field full-width">
