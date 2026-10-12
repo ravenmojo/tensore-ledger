@@ -1393,8 +1393,8 @@
       position: fixed;
       inset: 0;
       z-index: 1000;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
       align-items: center;
       justify-content: center;
       padding: 20px;
@@ -1405,33 +1405,160 @@
       animation: fadeSlideIn 0.3s ease;
     }
 
+    .screenshot-modal-content {
+      position: relative;
+      max-width: 92vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .screenshot-modal-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      padding-right: 50px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      gap: 12px;
+    }
+
+    .screenshot-modal-title {
+      font-weight: 700;
+      font-size: 0.95em;
+      color: var(--text-primary);
+    }
+
+    .screenshot-external-link {
+      font-size: 0.82em;
+      font-weight: 600;
+      color: var(--header-border);
+      text-decoration: none;
+      background: rgba(235, 94, 40, 0.1);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      transition: background 0.2s;
+    }
+
+    .screenshot-external-link:hover {
+      background: rgba(235, 94, 40, 0.22);
+    }
+
+    .screenshot-modal-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-height: calc(90vh - 60px);
+      overflow-y: auto;
+      min-width: 280px;
+    }
+
+    .screenshot-modal-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 0.9em;
+    }
+
     .screenshot-modal img {
-      max-width: 90vw;
-      max-height: 85vh;
-      border-radius: var(--radius-md);
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+      max-width: 86vw;
+      max-height: 75vh;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      object-fit: contain;
+    }
+
+    .screenshot-modal-error {
+      padding: 24px;
+      max-width: 500px;
+      text-align: center;
+      color: var(--text-primary);
+    }
+
+    .screenshot-modal-error .error-icon {
+      font-size: 2.6em;
+      margin-bottom: 10px;
+    }
+
+    .screenshot-modal-error h4 {
+      font-size: 1.15em;
+      margin-bottom: 12px;
+      color: var(--debit);
+    }
+
+    .screenshot-modal-error p {
+      font-size: 0.88em;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      text-align: left;
+    }
+
+    .screenshot-modal-error .error-actions {
+      margin-top: 16px;
+    }
+
+    .btn-open-drive {
+      display: inline-block;
+      background: var(--header-border);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.88em;
+      padding: 9px 18px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 4px 12px rgba(235, 94, 40, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-open-drive:hover {
+      background: #d15220;
+      transform: translateY(-1px);
     }
 
     .screenshot-modal-close {
       position: absolute;
-      top: 20px;
-      right: 24px;
-      width: 40px;
-      height: 40px;
+      top: 10px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
+      background: rgba(0, 0, 0, 0.08);
+      color: var(--text-primary);
       border: none;
-      font-size: 1.3em;
+      font-size: 1.1em;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      z-index: 10;
     }
 
     .screenshot-modal-close:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.16);
+      transform: scale(1.08);
+    }
+
+    .dark-mode .screenshot-modal-close {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    .dark-mode .screenshot-modal-close:hover {
+      background: rgba(255, 255, 255, 0.28);
     }
 
     /* ============================
@@ -1891,8 +2018,26 @@
 
   <!-- Screenshot Modal -->
   <div class="screenshot-modal" id="screenshot-modal">
-    <button class="screenshot-modal-close" id="screenshot-modal-close">✕</button>
-    <img id="screenshot-modal-img" alt="Transaction screenshot" />
+    <div class="screenshot-modal-content">
+      <button class="screenshot-modal-close" id="screenshot-modal-close" title="Close">✕</button>
+      <div class="screenshot-modal-header" id="screenshot-modal-header">
+        <span class="screenshot-modal-title">📎 Transaction Screenshot</span>
+        <a href="#" target="_blank" class="screenshot-external-link" id="screenshot-external-link" style="display:none;">Open in Google Drive ↗</a>
+      </div>
+      <div class="screenshot-modal-body">
+        <div class="screenshot-modal-loader" id="screenshot-modal-loader" style="display:none;">
+          <div class="ocr-spinner"></div>
+          <span>Loading image preview...</span>
+        </div>
+        <img id="screenshot-modal-img" alt="Transaction screenshot" />
+        <div class="screenshot-modal-error" id="screenshot-modal-error" style="display:none;">
+          <div class="error-icon">⚠️</div>
+          <h4 id="screenshot-error-title">Cannot Display Image</h4>
+          <p id="screenshot-error-desc"></p>
+          <div class="error-actions" id="screenshot-error-actions"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <footer>
@@ -2631,14 +2776,124 @@
     });
 
     function openScreenshot(url) {
-      // Convert Google Drive URLs to direct image links
-      let imgUrl = url;
-      const driveMatch = url.match(/\/file\/d\/([^/]+)/);
-      if (driveMatch) {
-        imgUrl = `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+      if (!url) return;
+
+      const modal = document.getElementById('screenshot-modal');
+      const img = document.getElementById('screenshot-modal-img');
+      const errorBox = document.getElementById('screenshot-modal-error');
+      const extLink = document.getElementById('screenshot-external-link');
+      const loader = document.getElementById('screenshot-modal-loader');
+
+      // Reset states
+      img.style.display = 'none';
+      img.src = '';
+      errorBox.style.display = 'none';
+      extLink.style.display = 'none';
+      loader.style.display = 'flex';
+      modal.classList.add('visible');
+
+      // Case 1: Upload failed error string from Google Apps Script
+      if (url.startsWith('Upload failed:') || url.startsWith('Upload error:')) {
+        loader.style.display = 'none';
+        errorBox.style.display = 'block';
+        document.getElementById('screenshot-error-title').textContent = '⚠️ Google Drive Permission Required';
+        document.getElementById('screenshot-error-desc').innerHTML = `
+          <strong>Why this screenshot didn't open:</strong><br>
+          Google Apps Script was not granted permission to save screenshots to Google Drive when this entry was submitted.<br><br>
+          <strong>How to fix this permanently in 30 seconds:</strong><br>
+          1. Open your Google Sheet → <strong>Extensions</strong> → <strong>Apps Script</strong>.<br>
+          2. In the toolbar, select <code>authorizePermissions</code> from the function dropdown and click <strong>▶ Run</strong>.<br>
+          3. Click <strong>Review Permissions</strong> → select your account → <strong>Advanced</strong> → <strong>Allow</strong>.<br>
+          4. Click <strong>Deploy</strong> → <strong>Manage deployments</strong> → <strong>Edit</strong> → <strong>New version</strong> → <strong>Deploy</strong>.<br><br>
+          <em>All future uploads will save and open properly!</em><br><br>
+          <small style="color:var(--text-muted); word-break:break-all;">Apps Script error: ${escapeHtml(url)}</small>
+        `;
+        document.getElementById('screenshot-error-actions').innerHTML = '';
+        return;
       }
-      screenshotModalImg.src = imgUrl;
-      screenshotModal.classList.add('visible');
+
+      // Case 2: Base64 Data URL (e.g. data:image/png;base64,...)
+      if (url.startsWith('data:image')) {
+        img.onload = () => {
+          loader.style.display = 'none';
+          img.style.display = 'block';
+        };
+        img.onerror = () => {
+          loader.style.display = 'none';
+          showScreenshotError('Failed to decode image data.');
+        };
+        img.src = url;
+        return;
+      }
+
+      // Case 3: Google Drive URL
+      const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (driveMatch) {
+        const fileId = driveMatch[1];
+        const driveViewUrl = `https://drive.google.com/file/d/${fileId}/view`;
+        extLink.href = driveViewUrl;
+        extLink.style.display = 'inline-flex';
+
+        // Google Drive direct image URLs:
+        // Try lh3.googleusercontent.com/d/ first, then thumbnail fallback
+        const cdnUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+        const thumbUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600`;
+
+        let triedThumb = false;
+        img.onload = () => {
+          loader.style.display = 'none';
+          img.style.display = 'block';
+        };
+        img.onerror = () => {
+          if (!triedThumb) {
+            triedThumb = true;
+            img.src = thumbUrl;
+          } else {
+            loader.style.display = 'none';
+            img.style.display = 'none';
+            errorBox.style.display = 'block';
+            document.getElementById('screenshot-error-title').textContent = 'Google Drive Preview Restricted';
+            document.getElementById('screenshot-error-desc').innerHTML = `
+              Google Drive is blocking direct image embedding in this browser.<br>
+              You can view the full high-resolution receipt directly in Google Drive.
+            `;
+            document.getElementById('screenshot-error-actions').innerHTML = `
+              <a href="${driveViewUrl}" target="_blank" class="btn-open-drive">🔗 Open in Google Drive ↗</a>
+            `;
+          }
+        };
+
+        img.src = cdnUrl;
+        return;
+      }
+
+      // Case 4: Any other http URL
+      if (url.startsWith('http')) {
+        extLink.href = url;
+        extLink.style.display = 'inline-flex';
+        img.onload = () => {
+          loader.style.display = 'none';
+          img.style.display = 'block';
+        };
+        img.onerror = () => {
+          loader.style.display = 'none';
+          showScreenshotError(`Unable to preview external image directly.<br><br><a href="${url}" target="_blank" class="btn-open-drive">Open Link ↗</a>`);
+        };
+        img.src = url;
+        return;
+      }
+
+      // Default fallback
+      loader.style.display = 'none';
+      showScreenshotError(`Invalid screenshot format: ${escapeHtml(url)}`);
+    }
+
+    function showScreenshotError(message) {
+      const errorBox = document.getElementById('screenshot-modal-error');
+      document.getElementById('screenshot-error-title').textContent = '⚠️ Cannot Display Screenshot';
+      document.getElementById('screenshot-error-desc').innerHTML = message;
+      document.getElementById('screenshot-error-actions').innerHTML = '';
+      errorBox.style.display = 'block';
     }
 
     // Unlock
@@ -2740,11 +2995,30 @@
 
       const html = submissions.map(sub => {
         const isCash = !sub.screenshot || sub.screenshot.toLowerCase() === 'cash' || sub.screenshot === '—';
-        const screenshotLink = isCash
-          ? `<div class="card-screenshot"><span class="cash-badge">💵 Cash Contribution</span></div>`
-          : `<div class="card-screenshot">
-               <a href="#" onclick="openScreenshot('${sub.screenshot.replace(/'/g, "\\'")}') ; return false;">📎 View Screenshot</a>
+        const isUploadError = !isCash && sub.screenshot && (sub.screenshot.indexOf('Upload failed') === 0 || sub.screenshot.indexOf('Upload error') === 0);
+        const encodedScreenshot = encodeURIComponent(sub.screenshot || '');
+
+        let screenshotLink = '';
+        if (isCash) {
+          screenshotLink = `<div class="card-screenshot"><span class="cash-badge">💵 Cash Contribution</span></div>`;
+        } else if (isUploadError) {
+          screenshotLink = `<div class="card-screenshot">
+               <a href="#" onclick="openScreenshot(decodeURIComponent('${encodedScreenshot}')); return false;" style="color:var(--debit); font-weight:700; font-size:0.86em; text-decoration:underline;">⚠️ Upload Failed (Click for Info)</a>
              </div>`;
+        } else {
+          screenshotLink = `<div class="card-screenshot">
+               <a href="#" onclick="openScreenshot(decodeURIComponent('${encodedScreenshot}')); return false;">📎 View Screenshot</a>
+             </div>`;
+        }
+
+        let compareLink = '';
+        if (isCash) {
+          compareLink = `<span class="cash-badge" style="font-size:0.75em; padding:2px 8px;">💵 Cash</span>`;
+        } else if (isUploadError) {
+          compareLink = `<a href="#" onclick="openScreenshot(decodeURIComponent('${encodedScreenshot}')); return false;" style="font-size:0.88em; text-transform:none; color:var(--debit); font-weight:700;">⚠️ Upload Failed</a>`;
+        } else {
+          compareLink = `<a href="#" onclick="openScreenshot(decodeURIComponent('${encodedScreenshot}')); return false;" style="font-size:0.9em; text-transform:none; color:var(--header-border); font-weight:600;">📎 Compare Screenshot</a>`;
+        }
 
         return `
           <div class="submission-card" id="card-${sub.row}">
@@ -2772,7 +3046,7 @@
             <div class="card-edit-panel" id="edit-panel-${sub.row}">
               <div class="card-edit-title">
                 <span>✏️ Edit ${isCash ? 'Cash' : 'Auto-Detected'} Entry</span>
-                ${!isCash && sub.screenshot ? `<a href="#" onclick="openScreenshot('${sub.screenshot.replace(/'/g, "\\'")}') ; return false;" style="font-size:0.9em; text-transform:none; color:var(--header-border); font-weight:600;">📎 Compare Screenshot</a>` : `<span class="cash-badge" style="font-size:0.75em; padding:2px 8px;">💵 Cash</span>`}
+                ${compareLink}
               </div>
               <div class="card-edit-row">
                 <div class="card-edit-field full-width">
